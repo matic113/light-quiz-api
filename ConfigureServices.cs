@@ -1,6 +1,4 @@
 ﻿
-using Microsoft.EntityFrameworkCore.Internal;
-
 namespace light_quiz_api
 {
     public static class ConfigureServices
@@ -26,6 +24,18 @@ namespace light_quiz_api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Light-Quiz Api",
+                    Version = "v1",
+                    Description = "Simple Quiz platform",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Fares Mahmoud",
+                        Email = "faresma7moud1@gmail.com"
+                    }
+                });
+
                 options.CustomSchemaIds(type => type.FullName?.Replace('+', '.'));
                 options.InferSecuritySchemes();
 
