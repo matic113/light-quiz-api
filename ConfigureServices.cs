@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.EntityFrameworkCore.Internal;
+
 namespace light_quiz_api
 {
     public static class ConfigureServices
@@ -65,6 +67,7 @@ namespace light_quiz_api
                 //}
 
                 options.UseNpgsql(connectionString);
+                options.UseSnakeCaseNamingConvention();
             });
         }
 
