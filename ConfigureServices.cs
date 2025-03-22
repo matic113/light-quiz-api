@@ -1,14 +1,4 @@
-﻿using light_quiz_api.Data;
-using light_quiz_api.Helpers;
-using light_quiz_api.Models;
-using light_quiz_api.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
-
+﻿
 namespace light_quiz_api
 {
     public static class ConfigureServices

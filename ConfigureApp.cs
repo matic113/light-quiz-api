@@ -1,6 +1,4 @@
-﻿using light_quiz_api.Data;
-using Microsoft.EntityFrameworkCore;
-
+﻿
 namespace light_quiz_api
 {
     public static class ConfigureApp
