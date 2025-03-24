@@ -25,8 +25,8 @@ namespace light_quiz_api.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("DELETE FROM \"public.AspNetRoles\" WHERE \"name\" = 'student'");
-            migrationBuilder.Sql("DELETE FROM \"public.AspNetRoles\" WHERE \"name\" = 'teacher'");
+            migrationBuilder.Sql("DELETE FROM public.\"AspNetRoles\" WHERE \"name\" = 'student'");
+            migrationBuilder.Sql("DELETE FROM public.\"AspNetRoles\" WHERE \"name\" = 'teacher'");
         }
     }
 }
