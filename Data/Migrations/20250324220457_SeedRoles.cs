@@ -2,12 +2,11 @@
 
 #nullable disable
 
-namespace light_quiz_api.Migrations
+namespace light_quiz_api.Data.Migrations
 {
     /// <inheritdoc />
     public partial class SeedRoles : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.InsertData(

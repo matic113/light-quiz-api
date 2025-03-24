@@ -9,11 +9,11 @@ using light_quiz_api.Data;
 
 #nullable disable
 
-namespace light_quiz_api.Migrations
+namespace light_quiz_api.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250322151700_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250324220457_SeedRoles")]
+    partial class SeedRoles
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -507,10 +507,6 @@ namespace light_quiz_api.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("anonymous");
 
-                    b.Property<Guid?>("AppUserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("app_user_id");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -545,9 +541,6 @@ namespace light_quiz_api.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_quizzes");
-
-                    b.HasIndex("AppUserId")
-                        .HasDatabaseName("ix_quizzes_app_user_id");
 
                     b.HasIndex("CreatedBy")
                         .HasDatabaseName("ix_quizzes_created_by");
@@ -852,13 +845,8 @@ namespace light_quiz_api.Migrations
 
             modelBuilder.Entity("light_quiz_api.Models.Quiz", b =>
                 {
-                    b.HasOne("light_quiz_api.Models.AppUser", null)
-                        .WithMany("CreatedQuizzes")
-                        .HasForeignKey("AppUserId")
-                        .HasConstraintName("fk_quizzes_users_app_user_id");
-
                     b.HasOne("light_quiz_api.Models.AppUser", "CreatedByUser")
-                        .WithMany()
+                        .WithMany("CreatedQuizzes")
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()

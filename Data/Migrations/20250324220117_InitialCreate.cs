@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace light_quiz_api.Migrations
+namespace light_quiz_api.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -264,8 +264,7 @@ namespace light_quiz_api.Migrations
                     group_id = table.Column<Guid>(type: "uuid", nullable: true),
                     created_by = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    anonymous = table.Column<bool>(type: "boolean", nullable: false),
-                    app_user_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    anonymous = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -276,11 +275,6 @@ namespace light_quiz_api.Migrations
                         principalTable: "groups",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_quizzes_users_app_user_id",
-                        column: x => x.app_user_id,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "id");
                     table.ForeignKey(
                         name: "fk_quizzes_users_created_by",
                         column: x => x.created_by,
@@ -548,11 +542,6 @@ namespace light_quiz_api.Migrations
                 name: "ix_quiz_progresses_user_id",
                 table: "quiz_progresses",
                 column: "user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_quizzes_app_user_id",
-                table: "quizzes",
-                column: "app_user_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_quizzes_created_by",

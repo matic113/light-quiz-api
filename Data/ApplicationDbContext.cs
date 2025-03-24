@@ -66,7 +66,7 @@ namespace light_quiz_api.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(q => q.CreatedByUser)
-                .WithMany()
+                .WithMany(u => u.CreatedQuizzes)
                 .HasForeignKey(q => q.CreatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
         }
