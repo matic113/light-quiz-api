@@ -1,4 +1,7 @@
 ﻿
+using gemini_test.Services;
+using System.Threading.RateLimiting;
+
 namespace light_quiz_api
 {
     public static class ConfigureServices
@@ -15,6 +18,8 @@ namespace light_quiz_api
 
             //builder.Services.AddSingleton(new BlobServiceClient(blobConnectionString));
             //builder.Services.AddSingleton<IBlobService, FileBlobService>();
+
+            builder.AddGeminiServices();
 
             builder.AddJwtAuthentication();
         }
@@ -71,14 +76,34 @@ namespace light_quiz_api
             {
                 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-                //if (builder.Environment.IsDevelopment())
-                //{
-                //    connectionString = builder.Configuration.GetConnectionString("DevConnection");
-                //}
+                if (builder.Environment.IsDevelopment())
+                {
+                    connectionString = builder.Configuration.GetConnectionString("DevConnection");
+                }
 
                 options.UseNpgsql(connectionString);
                 options.UseSnakeCaseNamingConvention();
             });
+        }
+
+        private static void AddGeminiServices(this WebApplicationBuilder builder)
+        {
+            builder.Services.AddSingleton<RateLimiter>(sp =>
+            {
+                var options = new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 30,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 100 // Queue Up to 100 reqs
+                };
+                return new FixedWindowRateLimiter(options);
+            });
+
+            builder.Services.Configure<GeminiSettings>(
+              builder.Configuration.GetSection(GeminiSettings.SectionName));
+
+            builder.Services.AddScoped<IGeminiService, GeminiService>();
         }
 
         private static void AddJwtAuthentication(this WebApplicationBuilder builder)
