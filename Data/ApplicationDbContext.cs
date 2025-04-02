@@ -162,7 +162,7 @@ namespace light_quiz_api.Data
 
             // Relationships
             builder.HasOne(qp => qp.User)
-                .WithMany()
+                .WithMany(u => u.QuizProgresses)
                 .HasForeignKey(qp => qp.UserId);
 
             builder.HasOne(qp => qp.Quiz)
@@ -187,7 +187,7 @@ namespace light_quiz_api.Data
 
             // Relationships
             builder.HasOne(ur => ur.User)
-                .WithMany()
+                .WithMany(u => u.Results)
                 .HasForeignKey(ur => ur.UserId);
 
             builder.HasOne(ur => ur.Quiz)
@@ -215,11 +215,11 @@ namespace light_quiz_api.Data
 
             // Relationships
             builder.HasOne(sa => sa.User)
-                .WithMany()
+                .WithMany(u => u.StudentAnswers)
                 .HasForeignKey(sa => sa.UserId);
 
             builder.HasOne(sa => sa.Quiz)
-                .WithMany()
+                .WithMany(q => q.StudentAnswers)
                 .HasForeignKey(sa => sa.QuizId);
 
             builder.HasOne(sa => sa.Question)
@@ -265,7 +265,7 @@ namespace light_quiz_api.Data
                 .HasForeignKey(gm => gm.GroupId);
 
             builder.HasOne(gm => gm.Member)
-                .WithMany()
+                .WithMany(m => m.GroupMemberships)
                 .HasForeignKey(gm => gm.MemberId);
         }
 

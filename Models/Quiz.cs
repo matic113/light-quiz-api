@@ -18,5 +18,6 @@
         public ICollection<Question> Questions { get; set; }
         public ICollection<QuizProgress> QuizProgresses { get; set; }
         public ICollection<UserResult> UserResults { get; set; }
+        public ICollection<StudentAnswer> StudentAnswers { get; set; }
     }
 }
