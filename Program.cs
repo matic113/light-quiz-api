@@ -9,6 +9,6 @@ var app = builder.Build();
 await app.Configure();
 
 app.MapGet("/", () => "Hello World!")
-    .WithTags("TESTING");
+    .WithTags("Health");
 
 app.Run();
