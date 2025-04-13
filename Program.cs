@@ -8,7 +8,10 @@ var app = builder.Build();
 
 await app.Configure();
 
-app.MapGet("/", () => "Hello World!")
+app.MapGet("/health", () => "Hello World!")
+    .WithTags("Health");
+
+app.MapGet("/hello", () => "Hello World!")
     .WithTags("Health");
 
 app.Run();
