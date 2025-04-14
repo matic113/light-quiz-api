@@ -20,6 +20,7 @@ namespace light_quiz_api.Controllers
         }
 
         [HttpGet("{quizId:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetQuizResponse))]
         public async Task<ActionResult<Quiz>> GetQuiz(Guid quizId)
         {
             var quiz = await _context.Quizzes.FirstOrDefaultAsync(q => q.Id == quizId);
