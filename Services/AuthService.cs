@@ -106,6 +106,7 @@ public class AuthService : IAuthService
     {
         var userClaims = await _userManager.GetClaimsAsync(user);
         var roles = await _userManager.GetRolesAsync(user);
+        var userId = await _userManager.GetUserIdAsync(user);
         var roleClaims = new List<Claim>();
 
         foreach (var role in roles)
@@ -113,9 +114,10 @@ public class AuthService : IAuthService
 
         var claims = new[]
         {
+            new Claim("userId", userId),
             new Claim(JwtRegisteredClaimNames.Sub, user.UserName!),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email!)
         }
         .Union(userClaims)
         .Union(roleClaims);
