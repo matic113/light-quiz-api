@@ -54,7 +54,7 @@ namespace light_quiz_api.Controllers
                 QuizId = quiz.Id,
                 Title = quiz.Title,
                 Description = quiz.Description ?? string.Empty,
-                StartsAt = quiz.StartsAt,
+                StartsAtUTC = quiz.StartsAt,
                 DurationMinutes = quiz.DurationMinutes,
                 CreatorId = quiz.CreatedBy,
                 CreatedAt = quiz.CreatedAt,

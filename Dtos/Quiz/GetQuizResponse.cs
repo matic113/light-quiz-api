@@ -7,7 +7,7 @@ namespace light_quiz_api.Dtos.Quiz
         public Guid QuizId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime StartsAt { get; set; }
+        public DateTime StartsAtUTC { get; set; }
         public int DurationMinutes { get; set; }
         public Guid CreatorId { get; set; }
         public DateTime CreatedAt { get; set; }
