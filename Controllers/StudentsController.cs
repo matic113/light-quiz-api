@@ -110,6 +110,9 @@ namespace light_quiz_api.Controllers
                 SubmittedAt = DateTime.UtcNow,
             };
 
+            await _context.StudentQuizSubmissions.AddAsync(quizSubmission);
+            await _context.SaveChangesAsync();
+
             return Ok();
         }
     }
