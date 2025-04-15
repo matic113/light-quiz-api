@@ -11,6 +11,7 @@ namespace light_quiz_api.Models
         public ICollection<Quiz> CreatedQuizzes { get; set; }
         public ICollection<QuizProgress> QuizProgresses { get; set; }
         public ICollection<UserResult> Results { get; set; }
+        public ICollection<StudentQuizSubmission> QuizSubmissions { get; set; }
         public ICollection<StudentAnswer> StudentAnswers { get; set; }
         public ICollection<Invitation> SentInvitations { get; set; }
         public ICollection<Invitation> ReceivedInvitations { get; set; }

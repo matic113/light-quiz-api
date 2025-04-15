@@ -19,6 +19,7 @@ namespace light_quiz_api.Data
             ConfigureQuestionTypesTable(builder);
             ConfigureQuizProgressesTable(builder);
             ConfigureUserResultsTable(builder);
+            ConfigureStudentQuizSubmissionsTable(builder);
             ConfigureStudentAnswersTable(builder);
             ConfigureGroupsTable(builder);
             ConfigureGroupMembersTable(builder);
@@ -34,6 +35,7 @@ namespace light_quiz_api.Data
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<QuizProgress> QuizProgresses { get; set; }
         public DbSet<UserResult> UserResults { get; set; }
+        public DbSet<StudentQuizSubmission> StudentQuizSubmissions { get; set; }
         public DbSet<StudentAnswer> StudentAnswers { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMember> GroupMembers { get; set; }
@@ -195,6 +197,30 @@ namespace light_quiz_api.Data
                 .HasForeignKey(ur => ur.QuizId);
         }
 
+        private void ConfigureStudentQuizSubmissionsTable(ModelBuilder modelBuilder)
+        {
+            var builder = modelBuilder.Entity<StudentQuizSubmission>();
+
+            // Table name
+            builder.ToTable("student_quiz_submissions");
+
+            // Primary key
+            builder.HasKey(x => x.Id);
+
+            // Properties
+            builder.Property(x => x.StudentId).IsRequired();
+            builder.Property(ur => ur.QuizId).IsRequired();
+
+            // Relationships
+            builder.HasOne(ur => ur.Student)
+                .WithMany(u => u.QuizSubmissions)
+                .HasForeignKey(ur => ur.StudentId);
+
+            builder.HasOne(ur => ur.Quiz)
+                .WithMany(q => q.StudentSubmissions)
+                .HasForeignKey(ur => ur.QuizId);
+        }
+
         private void ConfigureStudentAnswersTable(ModelBuilder modelBuilder)
         {
             var builder = modelBuilder.Entity<StudentAnswer>();
@@ -210,7 +236,7 @@ namespace light_quiz_api.Data
             builder.Property(sa => sa.UserId).IsRequired();
             builder.Property(sa => sa.QuizId).IsRequired();
             builder.Property(sa => sa.QuestionId).IsRequired();
-            builder.Property(sa => sa.AnswerOption).HasColumnName("answer_option").HasMaxLength(255);
+            builder.Property(sa => sa.AnswerOptionLetter).HasColumnName("answer_option_letter").HasMaxLength(255);
             builder.Property(sa => sa.AnswerText).HasColumnName("answer_text").HasMaxLength(255);
 
             // Relationships

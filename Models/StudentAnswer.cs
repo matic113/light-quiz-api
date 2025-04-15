@@ -6,8 +6,8 @@
         public Guid UserId { get; set; }
         public Guid QuizId { get; set; }
         public Guid QuestionId { get; set; }
-        public string AnswerOption { get; set; }
-        public string AnswerText { get; set; }
+        public char? AnswerOptionLetter { get; set; }
+        public string? AnswerText { get; set; }
 
         // Navigational properties
         public AppUser User { get; set; }

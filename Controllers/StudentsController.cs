@@ -1,5 +1,7 @@
 ﻿using light_quiz_api.Dtos.Question;
+using light_quiz_api.Dtos.Quiz;
 using light_quiz_api.Dtos.QuizProgress;
+using light_quiz_api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,6 +64,53 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(latestProgress);
+        }
+
+        [HttpPost("/submit/{quizId:guid}")]
+        public async Task<ActionResult> SubmitQuiz(Guid quizId, [FromBody] SubmitQuizRequest request)
+        {
+            if (quizId != request.QuizId)
+            {
+                return BadRequest("quizId mismatch between sent request and route paramater");
+            }
+
+            var pastSubmission = await _context.StudentQuizSubmissions
+                .Where(x => x.QuizId == quizId && x.StudentId == request.StudentId)
+                .FirstOrDefaultAsync();
+
+            if (pastSubmission is not null)
+            {
+                return BadRequest("You have already submitted this quiz.");
+            }
+
+            var studentAnswers = new List<StudentAnswer>();
+
+            foreach (var answer in request.Answers)
+            {
+                var curr = new StudentAnswer
+                {
+                    Id = Guid.NewGuid(),
+                    QuizId = quizId,
+                    UserId = request.StudentId,
+                    QuestionId = answer.QuestionId,
+                    AnswerOptionLetter = answer.OptionLetter ?? null,
+                    AnswerText = answer.AnswerText ?? string.Empty
+                };
+
+                studentAnswers.Add(curr);
+            }
+
+            await _context.StudentAnswers.AddRangeAsync(studentAnswers);
+
+            var quizSubmission = new StudentQuizSubmission
+            {
+                Id = Guid.NewGuid(),
+                QuizId = quizId,
+                StudentId = request.StudentId,
+                SubmittedAt = DateTime.UtcNow,
+            };
+
+            return Ok();
         }
     }
 }

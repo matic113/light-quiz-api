@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using light_quiz_api.Data;
@@ -11,9 +12,11 @@ using light_quiz_api.Data;
 namespace light_quiz_api.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250415142839_ChangeAnswerOptionTypeToChar")]
+    partial class ChangeAnswerOptionTypeToChar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -632,37 +635,6 @@ namespace light_quiz_api.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("light_quiz_api.Models.StudentQuizSubmissions", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("QuizId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("quiz_id");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("student_id");
-
-                    b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("submitted_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_student_quiz_submissions");
-
-                    b.HasIndex("QuizId")
-                        .HasDatabaseName("ix_student_quiz_submissions_quiz_id");
-
-                    b.HasIndex("StudentId")
-                        .HasDatabaseName("ix_student_quiz_submissions_student_id");
-
-                    b.ToTable("student_quiz_submissions", (string)null);
-                });
-
             modelBuilder.Entity("light_quiz_api.Models.UserResult", b =>
                 {
                     b.Property<Guid>("Id")
@@ -907,27 +879,6 @@ namespace light_quiz_api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("light_quiz_api.Models.StudentQuizSubmissions", b =>
-                {
-                    b.HasOne("light_quiz_api.Models.Quiz", "Quiz")
-                        .WithMany("StudentSubmissions")
-                        .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_student_quiz_submissions_quizzes_quiz_id");
-
-                    b.HasOne("light_quiz_api.Models.AppUser", "Student")
-                        .WithMany("QuizSubmissions")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_student_quiz_submissions_users_student_id");
-
-                    b.Navigation("Quiz");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("light_quiz_api.Models.UserResult", b =>
                 {
                     b.HasOne("light_quiz_api.Models.Quiz", "Quiz")
@@ -956,8 +907,6 @@ namespace light_quiz_api.Data.Migrations
                     b.Navigation("GroupMemberships");
 
                     b.Navigation("QuizProgresses");
-
-                    b.Navigation("QuizSubmissions");
 
                     b.Navigation("ReceivedInvitations");
 
@@ -996,8 +945,6 @@ namespace light_quiz_api.Data.Migrations
                     b.Navigation("QuizProgresses");
 
                     b.Navigation("StudentAnswers");
-
-                    b.Navigation("StudentSubmissions");
 
                     b.Navigation("UserResults");
                 });
