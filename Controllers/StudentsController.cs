@@ -1,4 +1,5 @@
-﻿using light_quiz_api.Dtos.Question;
+﻿using System.Text.Json;
+using light_quiz_api.Dtos.Question;
 using light_quiz_api.Dtos.Quiz;
 using light_quiz_api.Dtos.QuizProgress;
 using light_quiz_api.Models;
@@ -12,10 +13,12 @@ namespace light_quiz_api.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public StudentsController(ApplicationDbContext context)
+        public StudentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("/progress/{quizId:guid}")]
@@ -24,6 +27,11 @@ namespace light_quiz_api.Controllers
             if (quizId != request.QuizId)
             {
                 return BadRequest("quizId mismatch between sent request and route paramater");
+            }
+
+            if (!IsValidJson(request.Answers))
+            {
+                return BadRequest("The 'answers' field in the request is not a valid JSON string.");
             }
 
             var progress = new QuizProgress
@@ -37,15 +45,19 @@ namespace light_quiz_api.Controllers
                 LastSaved = request.LastSaved
             };
 
+            _context.QuizProgresses.Add(progress);
             await _context.SaveChangesAsync();
+
             return Ok();
         }
 
         [HttpGet("/progress/{quizId:guid}")]
         public async Task<ActionResult<GetQuizProgressResponse>> GetStudentProgress(Guid quizId)
         {
+            var studentId = GetCurrentUserId();
+
             var latestProgress = await _context.QuizProgresses
-                .Where(qp => qp.QuizId == quizId)
+                .Where(qp => qp.QuizId == quizId && qp.UserId == studentId)
                 .OrderByDescending(qp => qp.LastSaved)
                 .Select(qp => new GetQuizProgressResponse
                 {
@@ -114,6 +126,32 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var jtiClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("userId");
+
+            if (jtiClaim != null)
+            {
+                return Guid.Parse(jtiClaim.Value);
+            }
+
+            // Handle the case where the "jti" claim is not found
+            return Guid.Empty;
+        }
+        private bool IsValidJson(string strInput)
+        {
+            if (string.IsNullOrWhiteSpace(strInput)) { return true; } // Empty or null can be considered valid depending on your requirements
+            try
+            {
+                JsonDocument.Parse(strInput);
+                return true;
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
         }
     }
 }
