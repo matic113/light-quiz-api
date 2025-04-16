@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/student")]
     [ApiController]
     public class StudentsController : ControllerBase
     {
@@ -27,7 +27,7 @@ namespace light_quiz_api.Controllers
             _gradingService = gradingService;
         }
 
-        [HttpPost("/progress/{quizId:guid}")]
+        [HttpPost("progress/{quizId:guid}")]
         public async Task<ActionResult> SaveStudentProgress(Guid quizId, [FromBody] PostQuizProgressRequest request)
         {
             if (quizId != request.QuizId)
@@ -57,7 +57,7 @@ namespace light_quiz_api.Controllers
             return Ok();
         }
 
-        [HttpGet("/progress/{quizId:guid}")]
+        [HttpGet("progress/{quizId:guid}")]
         public async Task<ActionResult<GetQuizProgressResponse>> GetStudentProgress(Guid quizId)
         {
             var studentId = GetCurrentUserId();
@@ -84,7 +84,7 @@ namespace light_quiz_api.Controllers
             return Ok(latestProgress);
         }
 
-        [HttpPost("/submit/{quizId:guid}")]
+        [HttpPost("submit/{quizId:guid}")]
         public async Task<ActionResult> SubmitQuiz(Guid quizId, [FromBody] SubmitQuizRequest request)
         {
             if (quizId != request.QuizId)
@@ -134,7 +134,7 @@ namespace light_quiz_api.Controllers
             return Ok();
         }
 
-        [HttpPost("/grade/{quizId:guid}")]
+        [HttpPost("grade/{quizId:guid}")]
         public async Task<ActionResult> GradeQuiz(Guid quizId)
         {
             var studentId = GetCurrentUserId();
@@ -144,7 +144,7 @@ namespace light_quiz_api.Controllers
             return Ok();
         }
 
-        [HttpGet("/result/{quizId:guid}")]
+        [HttpGet("result/{quizId:guid}")]
         public async Task<ActionResult<GetStudentResultResponse>> GetQuizResult(Guid quizId)
         {
             if (quizId == Guid.Empty)
