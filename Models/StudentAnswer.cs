@@ -8,6 +8,9 @@
         public Guid QuestionId { get; set; }
         public char? AnswerOptionLetter { get; set; }
         public string? AnswerText { get; set; }
+        public int? GradingRating { get; set; }
+        public int? GradingConfidence { get; set; }
+        public string? GradingFeedback { get; set; }
 
         // Navigational properties
         public AppUser User { get; set; }
