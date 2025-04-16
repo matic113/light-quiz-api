@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace light_quiz_api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/quiz")]
     [Authorize]
     [ApiController]
     public class QuizzesController : ControllerBase

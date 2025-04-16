@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/questions")]
     [ApiController]
     public class QuestionsController : ControllerBase
     {
@@ -15,7 +15,7 @@ namespace light_quiz_api.Controllers
             _context = context;
         }
 
-        [HttpGet("/questiontypes")]
+        [HttpGet("questiontypes")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<GetQuestionTypesResponse>))]
         public async Task<ActionResult<IEnumerable<QuestionType>>> GetQuestionTypes()
         {
