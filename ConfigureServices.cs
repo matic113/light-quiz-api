@@ -1,5 +1,7 @@
 ﻿
 using gemini_test.Services;
+using Hangfire;
+using Hangfire.PostgreSql;
 using System.Threading.RateLimiting;
 
 namespace light_quiz_api
@@ -13,11 +15,15 @@ namespace light_quiz_api
             builder.AddSwagger();
             builder.AddDatabase();
 
+            builder.AddHangfireServices();
+
             //// Azure Blob Storage
             //var blobConnectionString = builder.Configuration.GetConnectionString("AzureStorage");
 
             //builder.Services.AddSingleton(new BlobServiceClient(blobConnectionString));
             //builder.Services.AddSingleton<IBlobService, FileBlobService>();
+
+            builder.Services.AddScoped<IGradingService, GradingService>();
 
             builder.AddGeminiServices();
 
@@ -72,18 +78,38 @@ namespace light_quiz_api
 
         private static void AddDatabase(this WebApplicationBuilder builder)
         {
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            if (builder.Environment.IsDevelopment())
+            {
+                connectionString = builder.Configuration.GetConnectionString("DevConnection");
+            }
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
-                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-                if (builder.Environment.IsDevelopment())
-                {
-                    connectionString = builder.Configuration.GetConnectionString("DevConnection");
-                }
-
                 options.UseNpgsql(connectionString);
                 options.UseSnakeCaseNamingConvention();
             });
+        }
+
+        private static void AddHangfireServices(this WebApplicationBuilder builder)
+        {
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            if (builder.Environment.IsDevelopment())
+            {
+                connectionString = builder.Configuration.GetConnectionString("DevConnection");
+            }
+
+            builder.Services.AddHangfire(config =>
+                config.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(connectionString),
+                new Hangfire.PostgreSql.PostgreSqlStorageOptions
+                {
+                    SchemaName = "hangfire",
+                }));
+
+            builder.Services.AddHangfireServer();
+
         }
 
         private static void AddGeminiServices(this WebApplicationBuilder builder)

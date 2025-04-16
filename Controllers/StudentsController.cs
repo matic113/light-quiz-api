@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Hangfire;
 using light_quiz_api.Dtos.Question;
 using light_quiz_api.Dtos.Quiz;
 using light_quiz_api.Dtos.QuizProgress;
@@ -14,11 +15,15 @@ namespace light_quiz_api.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IGradingService _gradingService;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
-        public StudentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+        public StudentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IBackgroundJobClient backgroundJobClient, IGradingService gradingService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _backgroundJobClient = backgroundJobClient;
+            _gradingService = gradingService;
         }
 
         [HttpPost("/progress/{quizId:guid}")]
@@ -105,7 +110,7 @@ namespace light_quiz_api.Controllers
                     QuizId = quizId,
                     UserId = request.StudentId,
                     QuestionId = answer.QuestionId,
-                    AnswerOptionLetter = answer.OptionLetter ?? null,
+                    AnswerOptionLetter = answer.OptionLetter,
                     AnswerText = answer.AnswerText ?? string.Empty
                 };
 
@@ -128,6 +133,15 @@ namespace light_quiz_api.Controllers
             return Ok();
         }
 
+        [HttpPost("/grade/{quizId:guid}")]
+        public async Task<ActionResult> GradeQuiz(Guid quizId)
+        {
+            var studentId = GetCurrentUserId();
+
+            // Enqueue the grading job
+            _backgroundJobClient.Enqueue(() => _gradingService.GradeQuizAsync(studentId, quizId));
+            return Ok();
+        }
         private Guid GetCurrentUserId()
         {
             var jtiClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("userId");

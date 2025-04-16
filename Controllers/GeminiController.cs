@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
@@ -9,8 +10,7 @@ namespace light_quiz_api.Controllers
     {
         private readonly IGeminiService _geminiService;
         private readonly ILogger<GeminiController> _logger;
-
-        public GeminiController(IGeminiService geminiService, ILogger<GeminiController> logger)
+        public GeminiController(IGeminiService geminiService, ILogger<GeminiController> logger, IBackgroundJobClient backgroundJobClient, IGradingService gradingService)
         {
             _geminiService = geminiService;
             _logger = logger;
