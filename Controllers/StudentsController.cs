@@ -3,6 +3,7 @@ using Hangfire;
 using light_quiz_api.Dtos.Question;
 using light_quiz_api.Dtos.Quiz;
 using light_quiz_api.Dtos.QuizProgress;
+using light_quiz_api.Dtos.Student;
 using light_quiz_api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -141,6 +142,36 @@ namespace light_quiz_api.Controllers
             // Enqueue the grading job
             _backgroundJobClient.Enqueue(() => _gradingService.GradeQuizAsync(studentId, quizId));
             return Ok();
+        }
+
+        [HttpGet("/result/{quizId:guid}")]
+        public async Task<ActionResult<GetStudentResultResponse>> GetQuizResult(Guid quizId)
+        {
+            if (quizId == Guid.Empty)
+            {
+                return BadRequest("Invalid quiz ID.");
+            }
+
+            var studentId = GetCurrentUserId();
+            
+            var result = await _context.UserResults
+                                .Where(ur => ur.UserId == studentId && ur.QuizId == quizId)
+                                .Select(ur => new GetStudentResultResponse
+                                {
+                                    StudentId = ur.UserId,
+                                    QuizId = ur.QuizId,
+                                    Grade = ur.Grade,
+                                    CorrectQuestions = ur.CorrectQuestions ?? 0,
+                                    TotalQuestions = ur.TotalQuestion ?? 0
+                                })
+                                .FirstOrDefaultAsync();
+
+            if (result is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
         }
         private Guid GetCurrentUserId()
         {
