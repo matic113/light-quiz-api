@@ -1,4 +1,5 @@
 ﻿
+using Hangfire;
 using Microsoft.Extensions.Options;
 
 namespace light_quiz_api
@@ -20,6 +21,8 @@ namespace light_quiz_api
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+
+            app.UseHangfireDashboard();
 
             await app.EnsureDatabaseCreated();
         }
