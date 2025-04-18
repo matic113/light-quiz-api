@@ -8,7 +8,10 @@ The backend API service for Light Quiz platform, providing endpoints for quiz ma
 
 ## Features
 
-To Be Added.
+- [x] Quiz creations and submission
+- [x] Auto Grading with gemini api
+
+The rest to be added
 
 ## Prerequisites
 
