@@ -2,11 +2,10 @@
 {
     public class GetQuizProgressResponse
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
-        public Guid QuizId { get; set; }
-        public string Answers { get; set; }
-        public DateTime StartTime { get; set; }
+        public Guid AttemptId { get; set; }
+        public List<QuestionAnswer> QuestionsAnswers { get; set; }
         public DateTime LastSaved { get; set; }
+        public DateTime AttemptStartTimeUTC { get; set; }
+        public DateTime AttemptEndTimeUTC { get; set; }
     }
 }

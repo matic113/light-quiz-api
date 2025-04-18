@@ -2,11 +2,7 @@
 {
     public class PostQuizProgressRequest
     {
-        public Guid QuizId { get; set; }
-        public Guid StudentId { get; set; }
-        public string Answers { get; set; }
-        public int RemainingTimeSeconds { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime LastSaved { get; set; }
+        public Guid AttemptId { get; set; }
+        public List<QuestionAnswer> QuestionsAnswers { get; set; }
     }
 }

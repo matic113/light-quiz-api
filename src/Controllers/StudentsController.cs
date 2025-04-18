@@ -7,6 +7,7 @@ using light_quiz_api.Dtos.Student;
 using light_quiz_api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace light_quiz_api.Controllers
 {
@@ -30,28 +31,51 @@ namespace light_quiz_api.Controllers
         [HttpPost("progress/{quizId:guid}")]
         public async Task<ActionResult> SaveStudentProgress(Guid quizId, [FromBody] PostQuizProgressRequest request)
         {
-            if (quizId != request.QuizId)
+            var attempt = await _context.QuizAttempts
+                .Where(qp => qp.Id == request.AttemptId)
+                .FirstOrDefaultAsync();
+
+            if (attempt is null)
             {
-                return BadRequest("quizId mismatch between sent request and route paramater");
+                return NotFound("Quiz attempt not found.");
             }
 
-            if (!IsValidJson(request.Answers))
+            attempt.LastSaved = DateTime.UtcNow;
+
+            var studentAnswers = await _context.StudentAnswers
+                .Where(x => x.QuizId == attempt.QuizId && x.UserId == attempt.StudentId)
+                .ToListAsync();
+
+            foreach (var answer in request.QuestionsAnswers)
             {
-                return BadRequest("The 'answers' field in the request is not a valid JSON string.");
+                if (answer.AnswerText is null && answer.AnswerOptionLetter is null)
+                {
+                    continue;
+                }
+
+                var existingAnswer = studentAnswers
+                    .FirstOrDefault(x => x.QuestionId == answer.QuestionId);
+
+                if (existingAnswer is null)
+                {
+                    var newAnswer = new StudentAnswer
+                    {
+                        Id = Guid.NewGuid(),
+                        QuizId = attempt.QuizId,
+                        UserId = attempt.StudentId,
+                        QuestionId = answer.QuestionId,
+                        AnswerOptionLetter = answer.AnswerOptionLetter,
+                        AnswerText = answer.AnswerText ?? string.Empty
+                    };
+                    await _context.StudentAnswers.AddAsync(newAnswer);
+                }
+                else
+                {
+                    existingAnswer.AnswerOptionLetter = answer.AnswerOptionLetter;
+                    existingAnswer.AnswerText = answer.AnswerText ?? string.Empty;
+                }
             }
 
-            var progress = new QuizProgress
-            {
-                Id = Guid.NewGuid(),
-                UserId = request.StudentId,
-                QuizId = quizId,
-                Answers = request.Answers,
-                RemainingTimeSeconds = request.RemainingTimeSeconds,
-                StartTime = request.StartTime,
-                LastSaved = request.LastSaved
-            };
-
-            _context.QuizProgresses.Add(progress);
             await _context.SaveChangesAsync();
 
             return Ok();
@@ -62,26 +86,38 @@ namespace light_quiz_api.Controllers
         {
             var studentId = GetCurrentUserId();
 
-            var latestProgress = await _context.QuizProgresses
-                .Where(qp => qp.QuizId == quizId && qp.UserId == studentId)
-                .OrderByDescending(qp => qp.LastSaved)
-                .Select(qp => new GetQuizProgressResponse
-                {
-                    Id = qp.Id,
-                    UserId = qp.UserId,
-                    QuizId = qp.QuizId,
-                    Answers = qp.Answers,
-                    StartTime = qp.StartTime,
-                    LastSaved = qp.LastSaved
-                })
+            var attempt = await _context.QuizAttempts
+                .Where(a => a.QuizId == quizId && a.StudentId == studentId)
                 .FirstOrDefaultAsync();
 
-            if (latestProgress is null)
+            if (attempt is null)
             {
                 return NotFound();
             }
 
-            return Ok(latestProgress);
+            var studentAnswers = await _context.StudentAnswers
+                .Where(x => x.QuizId == quizId && x.UserId == studentId)
+                .ToListAsync();
+
+            var questionsAnswered = studentAnswers
+                .Select(x => new QuestionAnswer
+                {
+                    QuestionId = x.QuestionId,
+                    AnswerOptionLetter = x.AnswerOptionLetter,
+                    AnswerText = x.AnswerText
+                })
+                .ToList();
+
+            var response = new GetQuizProgressResponse
+            {
+                AttemptId = attempt.Id,
+                QuestionsAnswers = questionsAnswered,
+                LastSaved = attempt.LastSaved,
+                AttemptStartTimeUTC = attempt.AttemptStartTimeUTC,
+                AttemptEndTimeUTC = attempt.AttemptEndTimeUTC
+            };
+
+            return Ok(response);
         }
 
         [HttpPost("submit/{quizId:guid}")]
@@ -92,19 +128,46 @@ namespace light_quiz_api.Controllers
                 return BadRequest("quizId mismatch between sent request and route paramater");
             }
 
-            var pastSubmission = await _context.StudentQuizSubmissions
+            var quiz = await _context.Quizzes.FindAsync(quizId);
+
+            if (quiz is null)
+            {
+                return BadRequest($"quiz with Id: {quizId} wasn't found");
+            }
+
+            var pastAttempt = await _context.QuizAttempts
                 .Where(x => x.QuizId == quizId && x.StudentId == request.StudentId)
                 .FirstOrDefaultAsync();
 
-            if (pastSubmission is not null)
+            if (pastAttempt is null)
             {
-                return BadRequest("You have already submitted this quiz.");
+                return BadRequest($"student with Id: {request.StudentId} has not started this quiz yet.");
             }
 
-            var studentAnswers = new List<StudentAnswer>();
+            if (pastAttempt.State == AttemptState.Submitted)
+            {
+                return BadRequest($"student with Id: {request.StudentId} has already submitted this quiz.");
+            }
+
+            var savedStudentAnswers = await _context.StudentAnswers
+                .Where(x => x.QuizId == request.QuizId && x.UserId == request.StudentId)
+                .ToListAsync();
+
+            var answersToBeAdded = new List<StudentAnswer>();
 
             foreach (var answer in request.Answers)
             {
+                var existingAnswer = savedStudentAnswers
+                    .FirstOrDefault(x => x.QuestionId == answer.QuestionId);
+
+                if (existingAnswer is not null)
+                {
+                    existingAnswer.AnswerOptionLetter = answer.OptionLetter;
+                    existingAnswer.AnswerText = answer.AnswerText ?? string.Empty;
+                    continue;
+                }
+
+                // If the answer doesn't exist, create a new one
                 var curr = new StudentAnswer
                 {
                     Id = Guid.NewGuid(),
@@ -115,10 +178,13 @@ namespace light_quiz_api.Controllers
                     AnswerText = answer.AnswerText ?? string.Empty
                 };
 
-                studentAnswers.Add(curr);
+                answersToBeAdded.Add(curr);
             }
 
-            await _context.StudentAnswers.AddRangeAsync(studentAnswers);
+            await _context.StudentAnswers.AddRangeAsync(answersToBeAdded);
+
+            // Update the quiz attempt state to submitted
+            pastAttempt.State = AttemptState.Submitted;
 
             var quizSubmission = new StudentQuizSubmission
             {
@@ -184,19 +250,6 @@ namespace light_quiz_api.Controllers
 
             // Handle the case where the "jti" claim is not found
             return Guid.Empty;
-        }
-        private bool IsValidJson(string strInput)
-        {
-            if (string.IsNullOrWhiteSpace(strInput)) { return true; } // Empty or null can be considered valid depending on your requirements
-            try
-            {
-                JsonDocument.Parse(strInput);
-                return true;
-            }
-            catch (JsonException)
-            {
-                return false;
-            }
         }
     }
 }
