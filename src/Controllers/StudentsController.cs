@@ -135,22 +135,24 @@ namespace light_quiz_api.Controllers
                 return BadRequest($"quiz with Id: {quizId} wasn't found");
             }
 
+            var studentId = GetCurrentUserId();
+
             var pastAttempt = await _context.QuizAttempts
-                .Where(x => x.QuizId == quizId && x.StudentId == request.StudentId)
+                .Where(x => x.QuizId == quizId && x.StudentId == studentId)
                 .FirstOrDefaultAsync();
 
             if (pastAttempt is null)
             {
-                return BadRequest($"student with Id: {request.StudentId} has not started this quiz yet.");
+                return BadRequest($"student with Id: {studentId} has not started this quiz yet.");
             }
 
             if (pastAttempt.State == AttemptState.Submitted)
             {
-                return BadRequest($"student with Id: {request.StudentId} has already submitted this quiz.");
+                return BadRequest($"student with Id: {studentId} has already submitted this quiz.");
             }
 
             var savedStudentAnswers = await _context.StudentAnswers
-                .Where(x => x.QuizId == request.QuizId && x.UserId == request.StudentId)
+                .Where(x => x.QuizId == request.QuizId && x.UserId == studentId)
                 .ToListAsync();
 
             var answersToBeAdded = new List<StudentAnswer>();
@@ -172,7 +174,7 @@ namespace light_quiz_api.Controllers
                 {
                     Id = Guid.NewGuid(),
                     QuizId = quizId,
-                    UserId = request.StudentId,
+                    UserId = studentId,
                     QuestionId = answer.QuestionId,
                     AnswerOptionLetter = answer.OptionLetter,
                     AnswerText = answer.AnswerText ?? string.Empty
@@ -190,7 +192,7 @@ namespace light_quiz_api.Controllers
             {
                 Id = Guid.NewGuid(),
                 QuizId = quizId,
-                StudentId = request.StudentId,
+                StudentId = studentId,
                 SubmittedAt = DateTime.UtcNow,
             };
 
