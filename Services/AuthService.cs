@@ -32,14 +32,7 @@ public class AuthService : IAuthService
             return (new AuthModel { IsAuthenticated = false }, errors);
         }
 
-        //if (await _userManager.FindByNameAsync(request.UserName) is not null)
-        //{
-        //    errors.Add(new ErrorDetail { PropertyName = "UserName", ErrorMessage = "Username already used" });
-        //    return (new AuthModel { IsAuthenticated = false }, errors);
-
-        //}
-
-        var userName = request.Email.Split('@')[0];
+        var userName = request.Email;
 
         var user = new AppUser
         {
@@ -60,9 +53,16 @@ public class AuthService : IAuthService
         }
 
         // If we get here, the user was created successfully
-        // add user to role User by default
+        // role assignment
 
-        await _userManager.AddToRoleAsync(user, "student");
+        var userRole = request.UserType.ToLower() switch
+        {
+            "admin" => "admin",
+            "teacher" => "teacher",
+            _ => "student"
+        };
+
+        await _userManager.AddToRoleAsync(user, userRole);
 
         var jwtSecurityToken = await CreateJwtToken(user);
 
