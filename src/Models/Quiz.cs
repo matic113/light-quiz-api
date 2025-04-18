@@ -16,7 +16,7 @@
         public Group Group { get; set; }
         public AppUser CreatedByUser { get; set; }
         public ICollection<Question> Questions { get; set; }
-        public ICollection<QuizProgress> QuizProgresses { get; set; }
+        public ICollection<QuizAttempt> QuizAttempts { get; set; }
         public ICollection<UserResult> UserResults { get; set; }
         public ICollection<StudentQuizSubmission> StudentSubmissions { get; set; }
         public ICollection<StudentAnswer> StudentAnswers { get; set; }

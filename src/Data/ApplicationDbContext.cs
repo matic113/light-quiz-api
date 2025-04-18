@@ -17,7 +17,7 @@ namespace light_quiz_api.Data
             ConfigureQuestionsTable(builder);
             ConfigureQuestionOptionsTable(builder);
             ConfigureQuestionTypesTable(builder);
-            ConfigureQuizProgressesTable(builder);
+            ConfigureQuizAttemptsTable(builder);
             ConfigureUserResultsTable(builder);
             ConfigureStudentQuizSubmissionsTable(builder);
             ConfigureStudentAnswersTable(builder);
@@ -33,7 +33,7 @@ namespace light_quiz_api.Data
         public DbSet<Question> Questions { get; set; }
         public DbSet<QuestionOption> QuestionOptions { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
-        public DbSet<QuizProgress> QuizProgresses { get; set; }
+        public DbSet<QuizAttempt> QuizAttempts { get; set; }
         public DbSet<UserResult> UserResults { get; set; }
         public DbSet<StudentQuizSubmission> StudentQuizSubmissions { get; set; }
         public DbSet<StudentAnswer> StudentAnswers { get; set; }
@@ -144,31 +144,33 @@ namespace light_quiz_api.Data
             );
         }
 
-        private void ConfigureQuizProgressesTable(ModelBuilder modelBuilder)
+        private void ConfigureQuizAttemptsTable(ModelBuilder modelBuilder)
         {
-            var builder = modelBuilder.Entity<QuizProgress>();
+            var builder = modelBuilder.Entity<QuizAttempt>();
 
             // Table name
-            builder.ToTable("quiz_progresses");
+            builder.ToTable("quiz_attempts");
 
             // Primary key
             builder.HasKey(qp => qp.Id);
 
             // Properties
-            builder.Property(qp => qp.UserId).IsRequired();
+            builder.Property(qp => qp.StudentId).IsRequired();
             builder.Property(qp => qp.QuizId).IsRequired();
-            builder.Property(qp => qp.Answers).HasColumnType("jsonb").IsRequired();
-            builder.Property(qp => qp.RemainingTimeSeconds).IsRequired();
-            builder.Property(qp => qp.StartTime).IsRequired();
+            builder.Property(qp => qp.AttemptStartTimeUTC).IsRequired();
             builder.Property(qp => qp.LastSaved).IsRequired();
 
+            // Map the string value
+            builder.Property(qp => qp.State)
+                .HasConversion<string>();
+
             // Relationships
-            builder.HasOne(qp => qp.User)
-                .WithMany(u => u.QuizProgresses)
-                .HasForeignKey(qp => qp.UserId);
+            builder.HasOne(qp => qp.Student)
+                .WithMany(u => u.QuizAttempts)
+                .HasForeignKey(qp => qp.StudentId);
 
             builder.HasOne(qp => qp.Quiz)
-                .WithMany(q => q.QuizProgresses)
+                .WithMany(q => q.QuizAttempts)
                 .HasForeignKey(qp => qp.QuizId);
         }
 
