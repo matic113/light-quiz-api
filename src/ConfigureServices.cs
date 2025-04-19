@@ -24,6 +24,8 @@ namespace light_quiz_api
             //builder.Services.AddSingleton<IBlobService, FileBlobService>();
 
             builder.Services.AddScoped<IGradingService, GradingService>();
+            builder.Services.AddScoped<StudentSubmissionService>();
+            builder.Services.AddScoped<ShortCodeGeneratorService>();
 
             builder.AddGeminiServices();
 

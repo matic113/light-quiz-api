@@ -17,12 +17,14 @@ namespace light_quiz_api.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly ILogger<QuizzesController> _logger;
-        public QuizzesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<QuizzesController> logger, IBackgroundJobClient backgroundJobClient)
+        private readonly ShortCodeGeneratorService _shortCodeGenerator;
+        public QuizzesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<QuizzesController> logger, IBackgroundJobClient backgroundJobClient, ShortCodeGeneratorService shortCodeGenerator)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _backgroundJobClient = backgroundJobClient;
+            _shortCodeGenerator = shortCodeGenerator;
         }
 
         [HttpGet("metadata/{quizId:guid}")]
@@ -43,6 +45,29 @@ namespace light_quiz_api.Controllers
             if (response is null)
             {
                 return BadRequest($"quiz with Id: {quizId} doesn't exist");
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet("metadata/{shortCode}")]
+        public async Task<ActionResult<GetQuizMetadataResponse>> GetQuizMetadataByShortCode(string shortCode)
+        {
+            var response = await _context.Quizzes
+                .Where(q => q.ShortCode == shortCode)
+                .Select(q => new GetQuizMetadataResponse
+                {
+                    Title = q.Title,
+                    Description = q.Description ?? string.Empty,
+                    StartsAt = q.StartsAt,
+                    TimeAllowed = q.DurationMinutes,
+                    NumberOfQuestions = _context.Questions.Count(x => x.QuizId == q.Id)
+                })
+                .FirstOrDefaultAsync();
+
+            if (response is null)
+            {
+                return BadRequest($"quiz with shortCode: {shortCode} doesn't exist");
             }
 
             return Ok(response);
@@ -129,6 +154,8 @@ namespace light_quiz_api.Controllers
             }
 
             var userId = GetCurrentUserId();
+            var shortCode = await _shortCodeGenerator.GenerateUniqueCodeAsync();
+
             var newQuiz = new Quiz{
                 Id = Guid.NewGuid(),
                 Title = request.Title,
@@ -137,7 +164,8 @@ namespace light_quiz_api.Controllers
                 DurationMinutes = request.DurationMinutes,
                 Anonymous = request.Anonymous ?? false,
                 CreatedBy = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                ShortCode = shortCode,
             };
             _context.Quizzes.Add(newQuiz);
 
@@ -174,7 +202,7 @@ namespace light_quiz_api.Controllers
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetQuizMetadata), new { quizId = newQuiz.Id }, null);
+            return CreatedAtAction(nameof(GetQuizMetadataByShortCode), new { shortCode }, null);
         }
         private Guid GetCurrentUserId()
         {
@@ -188,6 +216,5 @@ namespace light_quiz_api.Controllers
             // Handle the case where the "jti" claim is not found
             return Guid.Empty;
         }
-
     }
 }
