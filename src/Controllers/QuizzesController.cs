@@ -34,6 +34,7 @@ namespace light_quiz_api.Controllers
                 .Where(q => q.Id == quizId)
                 .Select(q => new GetQuizMetadataResponse
                 {
+                    QuizId = q.Id,
                     Title = q.Title,
                     Description = q.Description ?? string.Empty,
                     StartsAt = q.StartsAt,
@@ -57,6 +58,7 @@ namespace light_quiz_api.Controllers
                 .Where(q => q.ShortCode == shortCode)
                 .Select(q => new GetQuizMetadataResponse
                 {
+                    QuizId = q.Id,
                     Title = q.Title,
                     Description = q.Description ?? string.Empty,
                     StartsAt = q.StartsAt,
