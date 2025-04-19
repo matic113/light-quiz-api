@@ -8,6 +8,7 @@
         public int Grade { get; set; }
         public int? CorrectQuestions { get; set; }
         public int? TotalQuestion { get; set; }
+        public DateTime? CreatedAt { get; set; }
 
         // Navigational properties
         public AppUser User { get; set; }

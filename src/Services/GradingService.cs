@@ -147,7 +147,8 @@ namespace light_quiz_api.Services
                 UserId = studentId,
                 Grade =totalPoints,
                 CorrectQuestions = gradingResponse.Results.Count(r => r.Rating > 5),
-                TotalQuestion = quiz.Questions.Count
+                TotalQuestion = quiz.Questions.Count,
+                CreatedAt = DateTime.UtcNow
             };
             await _context.UserResults.AddAsync(finalResult);
 
