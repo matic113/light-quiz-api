@@ -11,6 +11,7 @@
         public Guid CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool Anonymous { get; set; }
+        public string? ShortCode { get; set; }
 
         // Navigation properties
         public Group Group { get; set; }

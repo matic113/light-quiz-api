@@ -52,6 +52,10 @@ namespace light_quiz_api.Data
             // Primary key
             builder.HasKey(q => q.Id);
 
+            builder.HasIndex(q => q.ShortCode)
+                .IsUnique()
+                .HasDatabaseName("IX_Quizzes_ShortCode");
+
             // Properties
             builder.Property(q => q.Title).IsRequired().HasMaxLength(255);
             builder.Property(q => q.Description).IsRequired().HasMaxLength(255);
