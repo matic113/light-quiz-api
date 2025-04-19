@@ -1,4 +1,5 @@
-﻿using light_quiz_api.Dtos.Question;
+﻿using Hangfire;
+using light_quiz_api.Dtos.Question;
 using light_quiz_api.Dtos.Quiz;
 using light_quiz_api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +15,14 @@ namespace light_quiz_api.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public QuizzesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+        private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly ILogger<QuizzesController> _logger;
+        public QuizzesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<QuizzesController> logger, IBackgroundJobClient backgroundJobClient)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         [HttpGet("metadata/{quizId:guid}")]
@@ -53,22 +58,34 @@ namespace light_quiz_api.Controllers
             {
                 return NotFound();
             }
-
+           
             var studentId = GetCurrentUserId();
+
+            var quizStartTime = DateTime.UtcNow;
+            var quizEndTime = DateTime.UtcNow.AddMinutes(quiz.DurationMinutes);
 
             var quizAttempt = new QuizAttempt
             {
                 Id = Guid.NewGuid(),
                 QuizId = quiz.Id,
                 StudentId = studentId,
-                AttemptStartTimeUTC = DateTime.UtcNow,
-                AttemptEndTimeUTC = DateTime.UtcNow.AddMinutes(quiz.DurationMinutes),
+                AttemptStartTimeUTC = quizStartTime,
+                AttemptEndTimeUTC = quizEndTime,
                 LastSaved = DateTime.UtcNow,
                 State = AttemptState.InProgress
             };
 
             await _context.QuizAttempts.AddAsync(quizAttempt);
             await _context.SaveChangesAsync();
+
+            // Schedule the auto quiz submit
+            _backgroundJobClient.Schedule<StudentSubmissionService>(
+                service => service.AutoSubmitQuizAsync(quizAttempt.Id),
+                TimeSpan.FromMinutes(quiz.DurationMinutes)
+                );
+
+            _logger.LogInformation($"Quiz attempt created for quiz {quizId} with attempt ID {quizAttempt.Id}");
+            _logger.LogInformation($"Scheduled auto submit for student {studentId}, attempt {quizAttempt.Id}");
 
             var questions =
                 await _context.Questions
