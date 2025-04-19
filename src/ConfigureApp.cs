@@ -16,7 +16,10 @@ namespace light_quiz_api
 
             app.UseHttpsRedirection();
 
-            app.UseCors(app => app.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseCors(app => app.AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader()
+                                .WithExposedHeaders("Location"));
 
             app.UseAuthentication();
             app.UseAuthorization();
