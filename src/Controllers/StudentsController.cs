@@ -199,16 +199,9 @@ namespace light_quiz_api.Controllers
             await _context.StudentQuizSubmissions.AddAsync(quizSubmission);
             await _context.SaveChangesAsync();
 
-            return Ok();
-        }
-
-        [HttpPost("grade/{quizId:guid}")]
-        public async Task<ActionResult> GradeQuiz(Guid quizId)
-        {
-            var studentId = GetCurrentUserId();
-
-            // Enqueue the grading job
+            // auto grade the quiz after submission
             _backgroundJobClient.Enqueue(() => _gradingService.GradeQuizAsync(studentId, quizId));
+
             return Ok();
         }
 
