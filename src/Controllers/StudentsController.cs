@@ -234,6 +234,33 @@ namespace light_quiz_api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("results")]
+        public async Task<ActionResult<IEnumerable<GetStudentResultResponse>>> GetStudentResults([FromQuery] int limit = 10)
+        {
+            var studentId = GetCurrentUserId();
+
+            var results = await _context.UserResults
+                                    .Where(ur => ur.UserId == studentId)
+                                    .OrderByDescending(ur => ur.CreatedAt)
+                                    .Select(ur => new GetStudentResultResponse
+                                    {
+                                        StudentId = ur.UserId,
+                                        QuizId = ur.QuizId,
+                                        Grade = ur.Grade,
+                                        CorrectQuestions = ur.CorrectQuestions ?? 0,
+                                        TotalQuestions = ur.TotalQuestion ?? 0
+                                    })
+                                    .Take(limit)
+                                    .ToListAsync();
+
+            if (!results.Any())
+            {
+                return Ok(Enumerable.Empty<GetStudentResultResponse>());
+            }
+
+            return Ok(results);
+        }
         private Guid GetCurrentUserId()
         {
             var jtiClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("userId");
