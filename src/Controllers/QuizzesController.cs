@@ -85,9 +85,9 @@ namespace light_quiz_api.Controllers
                 .Where(x => x.QuizId == quizId && x.StudentId == studentId)
                 .FirstOrDefaultAsync();
 
-            if (pastAttempt is null)
+            if (pastAttempt is not null)
             {
-                return BadRequest($"student with Id: {studentId} has not started this quiz yet.");
+                return BadRequest($"student with Id: {studentId} has taken this quiz before.");
             }
 
             var quiz = await _context.Quizzes.FirstOrDefaultAsync(q => q.Id == quizId);
