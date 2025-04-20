@@ -8,5 +8,6 @@
         public int TimeAllowed { get; set; }
         public DateTime StartsAt { get; set; }
         public int NumberOfQuestions { get; set; }
+        public bool DidStartQuiz { get; set; } = false;
     }
 }

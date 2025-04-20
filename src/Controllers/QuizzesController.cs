@@ -49,6 +49,13 @@ namespace light_quiz_api.Controllers
                 return BadRequest($"quiz with Id: {quizId} doesn't exist");
             }
 
+            var studentId = GetCurrentUserId();
+
+            var didStartQuiz = await _context.QuizAttempts
+                .AnyAsync(x => x.QuizId == response.QuizId && x.StudentId == studentId);
+
+            response.DidStartQuiz = didStartQuiz;
+
             return Ok(response);
         }
 
@@ -72,6 +79,13 @@ namespace light_quiz_api.Controllers
             {
                 return BadRequest($"quiz with shortCode: {shortCode} doesn't exist");
             }
+
+            var studentId = GetCurrentUserId();
+
+            var didStartQuiz = await _context.QuizAttempts
+                .AnyAsync(x => x.QuizId == response.QuizId && x.StudentId == studentId);
+
+            response.DidStartQuiz = didStartQuiz;
 
             return Ok(response);
         }
