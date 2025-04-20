@@ -2,6 +2,7 @@
 using light_quiz_api.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace light_quiz_api.Controllers
 {
@@ -39,6 +40,13 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(new { token = loginResult.Token, expireOn = loginResult.ExpiresOn });
+        }
+
+        [HttpPost("info")]
+        [Authorize]
+        public IActionResult GetInfo()
+        {
+            return Ok("Authenticated");
         }
     }
 }
