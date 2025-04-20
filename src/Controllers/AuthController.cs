@@ -11,9 +11,11 @@ namespace light_quiz_api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly UserManager<AppUser> _userManager;
+        public AuthController(IAuthService authService, UserManager<AppUser> userManager)
         {
             _authService = authService;
+            _userManager = userManager;
         }
 
         [HttpPost("register")]
@@ -46,6 +48,27 @@ namespace light_quiz_api.Controllers
         [Authorize]
         public IActionResult GetInfo()
         {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId");
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var userIdStringValue = userIdClaim.Value;
+
+            if (!Guid.TryParse(userIdStringValue, out Guid userIdGuid))
+            {
+                return Unauthorized();
+            }
+
+            var currentUser = _userManager.Users.FirstOrDefault(u => u.Id == userIdGuid);
+
+            if (currentUser is null)
+            {
+                return Unauthorized();
+            }
+
             return Ok("Authenticated");
         }
     }
