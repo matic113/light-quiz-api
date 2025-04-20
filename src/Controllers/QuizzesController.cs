@@ -79,6 +79,17 @@ namespace light_quiz_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetQuizResponse))]
         public async Task<ActionResult<Quiz>> StartAndGetQuiz(Guid quizId)
         {
+            var studentId = GetCurrentUserId();
+
+            var pastAttempt = await _context.QuizAttempts
+                .Where(x => x.QuizId == quizId && x.StudentId == studentId)
+                .FirstOrDefaultAsync();
+
+            if (pastAttempt is null)
+            {
+                return BadRequest($"student with Id: {studentId} has not started this quiz yet.");
+            }
+
             var quiz = await _context.Quizzes.FirstOrDefaultAsync(q => q.Id == quizId);
 
             if (quiz == null)
@@ -86,8 +97,6 @@ namespace light_quiz_api.Controllers
                 return NotFound();
             }
            
-            var studentId = GetCurrentUserId();
-
             var quizStartTime = DateTime.UtcNow;
             var quizEndTime = DateTime.UtcNow.AddMinutes(quiz.DurationMinutes);
 
