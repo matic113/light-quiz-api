@@ -140,12 +140,15 @@ namespace light_quiz_api.Services
                 }
             }
 
+            var possiblePoints = quiz.Questions.Sum(q => q.Points);
+
             var finalResult = new UserResult
             {
                 Id = Guid.NewGuid(),
                 QuizId = quizId,
                 UserId = studentId,
                 Grade =totalPoints,
+                PossiblePoints = possiblePoints,
                 CorrectQuestions = gradingResponse.Results.Count(r => r.Rating > 5),
                 TotalQuestion = quiz.Questions.Count,
                 CreatedAt = DateTime.UtcNow
