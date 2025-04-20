@@ -1,6 +1,7 @@
 ﻿using Hangfire;
 using light_quiz_api.Dtos.Question;
 using light_quiz_api.Dtos.Quiz;
+using light_quiz_api.Dtos.QuizProgress;
 using light_quiz_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -151,6 +152,91 @@ namespace light_quiz_api.Controllers
                 StartsAtUTC = quiz.StartsAt,
                 DurationMinutes = quiz.DurationMinutes,
                 Questions = questions
+            };
+
+            return Ok(response);
+        }
+
+        [HttpPost("resume/{quizId:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetQuizResponse))]
+        public async Task<ActionResult<Quiz>> ResumeQuiz(Guid quizId)
+        {
+            var studentId = GetCurrentUserId();
+
+            var pastAttempt = await _context.QuizAttempts
+                .Where(x => x.QuizId == quizId && x.StudentId == studentId)
+                .FirstOrDefaultAsync();
+
+            if (pastAttempt is null)
+            {
+                return BadRequest($"student with Id: {studentId} hasn't started this quiz yet.");
+            }
+
+            var quiz = await _context.Quizzes.FirstOrDefaultAsync(q => q.Id == quizId);
+
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+
+            var questions =
+                await _context.Questions
+                .Where(q => q.QuizId == quizId)
+                .Include(q => q.QuestionOptions)
+                .Select(q => new GetQuestionResponse
+                {
+                    QuizId = quizId,
+                    QuestionId = q.Id,
+                    Text = q.QuestionText,
+                    TypeId = q.QuestionTypeId,
+                    Points = q.Points,
+                    Options = q.QuestionOptions.Select(o => new GetQuestionOptionsResponse
+                    {
+                        OptionId = o.Id,
+                        OptionText = o.OptionText,
+                        OptionLetter = o.OptionLetter
+                    }).ToList()
+                }).ToListAsync();
+
+            var quizResponse = new GetQuizResponse
+            {
+                QuizId = quiz.Id,
+                AttemptId = pastAttempt.Id,
+                Title = quiz.Title,
+                Description = quiz.Description ?? string.Empty,
+                StartsAtUTC = quiz.StartsAt,
+                DurationMinutes = quiz.DurationMinutes,
+                Questions = questions
+            };
+
+            // get student progress
+
+            var studentAnswers = await _context.StudentAnswers
+                .Where(x => x.QuizId == quizId && x.UserId == studentId)
+                .ToListAsync();
+
+            var questionsAnswered = studentAnswers
+                .Select(x => new QuestionAnswer
+                {
+                    QuestionId = x.QuestionId,
+                    AnswerOptionLetter = x.AnswerOptionLetter,
+                    AnswerText = x.AnswerText
+                })
+                .ToList();
+
+            var progressResponse = new GetQuizProgressResponse
+            {
+                AttemptId = pastAttempt.Id,
+                QuestionsAnswers = questionsAnswered,
+                LastSaved = pastAttempt.LastSaved,
+                AttemptStartTimeUTC = pastAttempt.AttemptStartTimeUTC,
+                AttemptEndTimeUTC = pastAttempt.AttemptEndTimeUTC
+            };
+
+            var response = new
+            {
+                Quiz = quizResponse,
+                Progress = progressResponse
             };
 
             return Ok(response);
