@@ -222,6 +222,7 @@ namespace light_quiz_api.Controllers
                                     StudentId = ur.UserId,
                                     QuizId = ur.QuizId,
                                     Grade = ur.Grade,
+                                    PossiblePoints = ur.PossiblePoints,
                                     CorrectQuestions = ur.CorrectQuestions ?? 0,
                                     TotalQuestions = ur.TotalQuestion ?? 0
                                 })
@@ -248,6 +249,7 @@ namespace light_quiz_api.Controllers
                                         StudentId = ur.UserId,
                                         QuizId = ur.QuizId,
                                         Grade = ur.Grade,
+                                        PossiblePoints = ur.PossiblePoints,
                                         CorrectQuestions = ur.CorrectQuestions ?? 0,
                                         TotalQuestions = ur.TotalQuestion ?? 0
                                     })
