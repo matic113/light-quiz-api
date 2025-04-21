@@ -164,6 +164,7 @@ namespace light_quiz_api.Controllers
                 Title = quiz.Title,
                 Description = quiz.Description ?? string.Empty,
                 StartsAtUTC = quiz.StartsAt,
+                EndsAtUTC = quizEndTime,
                 DurationMinutes = quiz.DurationMinutes,
                 Questions = questions
             };

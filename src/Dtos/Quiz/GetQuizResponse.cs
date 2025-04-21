@@ -9,6 +9,7 @@ namespace light_quiz_api.Dtos.Quiz
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime StartsAtUTC { get; set; }
+        public DateTime EndsAtUTC { get; set; }
         public int DurationMinutes { get; set; }
         public List<GetQuestionResponse> Questions { get; set; }
     }
