@@ -166,6 +166,11 @@ namespace light_quiz_api.Controllers
                     }).ToList()
                 }).ToListAsync();
 
+            if (quiz.Randomize)
+            {
+                questions = questions.OrderBy(q => Guid.NewGuid()).ToList();
+            }
+
             var response = new GetQuizResponse
             {
                 QuizId = quiz.Id,
@@ -229,6 +234,11 @@ namespace light_quiz_api.Controllers
                     }).ToList()
                 }).ToListAsync();
 
+            if (quiz.Randomize)
+            {
+                questions = questions.OrderBy(q => Guid.NewGuid()).ToList();
+            }
+
             var quizResponse = new GetQuizResponse
             {
                 QuizId = quiz.Id,
@@ -291,6 +301,7 @@ namespace light_quiz_api.Controllers
                 StartsAt = request.StartsAtUTC,
                 DurationMinutes = request.DurationMinutes,
                 Anonymous = request.Anonymous ?? false,
+                Randomize = request.Randomize ?? false,
                 CreatedBy = userId,
                 CreatedAt = DateTime.UtcNow,
                 ShortCode = shortCode,

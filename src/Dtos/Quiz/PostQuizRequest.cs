@@ -9,6 +9,7 @@ namespace light_quiz_api.Dtos.Quiz
         public DateTime StartsAtUTC { get; set; }
         public int DurationMinutes { get; set; }
         public bool? Anonymous { get; set; }
+        public bool? Randomize { get; set; }
         public List<PostQuestionRequest> Questions { get; set; } = new List<PostQuestionRequest>();
     }
 }

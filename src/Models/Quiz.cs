@@ -11,6 +11,7 @@
         public Guid CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool Anonymous { get; set; }
+        public bool Randomize { get; set; } = false;
         public string? ShortCode { get; set; }
 
         // Navigation properties
