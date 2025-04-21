@@ -1,0 +1,9 @@
+﻿namespace light_quiz_api.Dtos.Group
+{
+    public class GetGroupResponse
+    {
+        public Guid GroupId { get; set; }
+        public string Name { get; set; }
+        public List<GroupMemberResponse> Members{ get; set; }
+    }
+}

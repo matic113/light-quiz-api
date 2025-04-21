@@ -3,9 +3,10 @@
     public class Group
     {
         public Guid Id{ get; set; }
+        public string ShortCode { get; set; }
         public string Name{ get; set; }
         public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
-        public Guid InvitationId { get; set; }
+        public Guid CreatedBy { get; set; }
 
         // Navigational Properties
 
