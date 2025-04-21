@@ -82,10 +82,16 @@ namespace light_quiz_api.Controllers
 
             var studentId = GetCurrentUserId();
 
-            var didStartQuiz = await _context.QuizAttempts
-                .AnyAsync(x => x.QuizId == response.QuizId && x.StudentId == studentId);
+            var pastAttempt= await _context.QuizAttempts
+                .FirstOrDefaultAsync(x => x.QuizId == response.QuizId && x.StudentId == studentId);
 
-            response.DidStartQuiz = didStartQuiz;
+            if (pastAttempt?.State == AttemptState.Submitted ||
+                pastAttempt?.State == AttemptState.AutomaticallySubmitted)
+            {
+                return BadRequest($"student with Id: {studentId} has taken this quiz before.");
+            }
+
+            response.DidStartQuiz = pastAttempt?.State == AttemptState.InProgress;
 
             return Ok(response);
         }
@@ -100,7 +106,9 @@ namespace light_quiz_api.Controllers
                 .Where(x => x.QuizId == quizId && x.StudentId == studentId)
                 .FirstOrDefaultAsync();
 
-            if (pastAttempt is not null)
+            if (pastAttempt is not null ||
+                pastAttempt?.State == AttemptState.Submitted ||
+                pastAttempt?.State == AttemptState.AutomaticallySubmitted)
             {
                 return BadRequest($"student with Id: {studentId} has taken this quiz before.");
             }
@@ -185,6 +193,12 @@ namespace light_quiz_api.Controllers
             if (pastAttempt is null)
             {
                 return BadRequest($"student with Id: {studentId} hasn't started this quiz yet.");
+            }
+
+            if( pastAttempt?.State == AttemptState.Submitted ||
+                pastAttempt?.State == AttemptState.AutomaticallySubmitted)
+            {
+                return BadRequest($"student with Id: {studentId} has taken this quiz before.");
             }
 
             var quiz = await _context.Quizzes.FirstOrDefaultAsync(q => q.Id == quizId);
