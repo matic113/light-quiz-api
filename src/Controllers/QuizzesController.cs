@@ -77,7 +77,7 @@ namespace light_quiz_api.Controllers
 
             if (response is null)
             {
-                return BadRequest($"quiz with shortCode: {shortCode} doesn't exist");
+                return NotFound($"quiz with shortCode: {shortCode} doesn't exist");
             }
 
             var studentId = GetCurrentUserId();
