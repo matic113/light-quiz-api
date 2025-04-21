@@ -149,6 +149,7 @@ namespace light_quiz_api.Controllers
             var questions =
                 await _context.Questions
                 .Where(q => q.QuizId == quizId)
+                .OrderBy(q => q.QuestionNumber)
                 .Include(q => q.QuestionOptions)
                 .Select(q => new GetQuestionResponse
                 {
@@ -211,6 +212,7 @@ namespace light_quiz_api.Controllers
             var questions =
                 await _context.Questions
                 .Where(q => q.QuizId == quizId)
+                .OrderBy(q => q.QuestionNumber)
                 .Include(q => q.QuestionOptions)
                 .Select(q => new GetQuestionResponse
                 {
@@ -306,7 +308,8 @@ namespace light_quiz_api.Controllers
                     QuestionText = question.QuestionText,
                     QuestionTypeId = question.QuestionTypeId,
                     Points = question.Points,
-                    CorrectAnswer = question.CorrectAnswer
+                    CorrectAnswer = question.CorrectAnswer,
+                    QuestionNumber = question.QuestionNumber
                 };
                 _context.Questions.Add(newQuestion);
                 if (question.Options is not null)
