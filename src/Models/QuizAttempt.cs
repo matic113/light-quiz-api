@@ -19,6 +19,7 @@
     {
         InProgress,
         Submitted,
+        AutomaticallySubmitted,
         TimedOut
     }
 }

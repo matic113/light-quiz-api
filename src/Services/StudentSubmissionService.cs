@@ -21,7 +21,7 @@
                 return;
             }
 
-            studentAttempt.State = AttemptState.Submitted;
+            studentAttempt.State = AttemptState.AutomaticallySubmitted;
             await _context.SaveChangesAsync();
 
             // run the autograding
