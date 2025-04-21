@@ -18,7 +18,7 @@
         /// <param name="maxAttempts">Maximum attempts to generate a unique code.</param>
         /// <returns>A unique share code.</returns>
         /// <exception cref="Exception">Thrown if a unique code could not be generated within maxAttempts.</exception>
-        public async Task<string> GenerateUniqueCodeAsync(int length = 8, int maxAttempts = 10)
+        public async Task<string> GenerateQuizShortCodeAsync(int length = 8, int maxAttempts = 10)
         {
             for (int i = 0; i < maxAttempts; i++)
             {
@@ -39,6 +39,33 @@
             throw new Exception($"Could not generate a unique share code within {maxAttempts} attempts. Consider increasing length or attempts.");
         }
 
+        /// <summary>
+        /// Generates a unique short share code for a quiz.
+        /// </summary>
+        /// <param name="length">The desired length of the share code.</param>
+        /// <param name="maxAttempts">Maximum attempts to generate a unique code.</param>
+        /// <returns>A unique share code.</returns>
+        /// <exception cref="Exception">Thrown if a unique code could not be generated within maxAttempts.</exception>
+        public async Task<string> GenerateGroupShortCodeAsync(int length = 8, int maxAttempts = 10)
+        {
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                string code = GenerateRandomCode(length);
+
+                // Check if a quiz with this code already exists
+                bool exists = await _context.Groups.AnyAsync(q => q.ShortCode == code);
+
+                if (!exists)
+                {
+                    return code;
+                }
+
+                // If it exists, loop and try again
+            }
+
+            // If loop finishes without finding a unique code, something is wrong (e.g., database is full of codes)
+            throw new Exception($"Could not generate a unique share code within {maxAttempts} attempts. Consider increasing length or attempts.");
+        }
         /// <summary>
         /// Generates a random code string of the specified length.
         /// </summary>

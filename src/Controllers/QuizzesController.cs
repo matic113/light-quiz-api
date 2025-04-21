@@ -292,7 +292,7 @@ namespace light_quiz_api.Controllers
             }
 
             var userId = GetCurrentUserId();
-            var shortCode = await _shortCodeGenerator.GenerateUniqueCodeAsync();
+            var shortCode = await _shortCodeGenerator.GenerateQuizShortCodeAsync();
 
             var newQuiz = new Quiz{
                 Id = Guid.NewGuid(),
