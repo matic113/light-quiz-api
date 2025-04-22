@@ -272,6 +272,8 @@ namespace light_quiz_api.Data
             // Primary key
             builder.HasKey(g => g.Id);
 
+            builder.HasIndex(g => g.ShortCode);
+
             // Properties
             builder.Property(g => g.Name).IsRequired().HasMaxLength(255);
             builder.Property(g => g.CreatedAt).IsRequired();
