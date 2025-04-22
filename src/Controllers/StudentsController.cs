@@ -236,6 +236,37 @@ namespace light_quiz_api.Controllers
 
             return Ok(result);
         }
+        [HttpGet("result/{shortCode}")]
+        public async Task<ActionResult<GetStudentResultResponse>> GetQuizResultByQuizShortCode(string shortCode)
+        {
+            if (string.IsNullOrEmpty(shortCode))
+            {
+                return BadRequest("Invalid quiz shortcode.");
+            }
+
+            var studentId = GetCurrentUserId();
+
+            var result = await _context.UserResults
+                                .Where(ur => ur.UserId == studentId && ur.QuizShortCode == shortCode)
+                                .Select(ur => new GetStudentResultResponse
+                                {
+                                    StudentId = ur.UserId,
+                                    QuizId = ur.QuizId,
+                                    Grade = ur.Grade,
+                                    QuizTitle = ur.QuizTitle ?? string.Empty,
+                                    PossiblePoints = ur.PossiblePoints,
+                                    CorrectQuestions = ur.CorrectQuestions ?? 0,
+                                    TotalQuestions = ur.TotalQuestion ?? 0
+                                })
+                                .FirstOrDefaultAsync();
+
+            if (result is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        }
 
         [HttpGet("results")]
         public async Task<ActionResult<IEnumerable<GetStudentResultResponse>>> GetStudentResults([FromQuery] int limit = 10)
