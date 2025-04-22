@@ -3,6 +3,7 @@
     public class GetGroupResponse
     {
         public Guid GroupId { get; set; }
+        public string ShortCode { get; set; }
         public string Name { get; set; }
         public List<GroupMemberResponse> Members{ get; set; }
     }

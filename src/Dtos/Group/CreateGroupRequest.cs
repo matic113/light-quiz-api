@@ -6,6 +6,6 @@ namespace light_quiz_api.Dtos.Group
     {
         [Required]
         public string GroupName { get; set; }
-        public List<Guid> StudentsId { get; set; } = [];
+        public List<Guid> MemberIds { get; set; } = [];
     }
 }
