@@ -147,6 +147,35 @@ namespace light_quiz_api.Controllers
 
             return Ok();
         }
+        [HttpPost("leave/{shortCode}")]
+        public async Task<IActionResult> LeaveGroup(string shortCode)
+        {
+            var group = await _context.Groups
+                .Include(g => g.GroupMembers)
+                    .ThenInclude(gm => gm.Member)
+                .FirstOrDefaultAsync(g => g.ShortCode == shortCode);
+
+            if (group is null)
+            {
+                return NotFound("Group not found");
+            }
+
+            var userId = GetCurrentUserId();
+
+            var groupMember = group.GroupMembers.FirstOrDefault(gm => gm.MemberId == userId);
+
+            if (groupMember is null)
+            {
+                return BadRequest("You are not a member of this group");
+            }
+            else
+            {
+                _context.Remove(groupMember);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
 
         [HttpGet("created")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<GetGroupResponse>))]
