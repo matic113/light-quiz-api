@@ -188,6 +188,13 @@ namespace light_quiz_api.Data
             // Primary key
             builder.HasKey(ur => ur.Id);
 
+            // Index
+            builder.HasIndex(ur => new { ur.UserId, ur.QuizShortCode })
+                   .IsUnique();
+
+            builder.HasIndex(ur => new { ur.UserId, ur.QuizId })
+                   .IsUnique();
+
             // Properties
             builder.Property(ur => ur.UserId).IsRequired();
             builder.Property(ur => ur.QuizId).IsRequired();
