@@ -40,7 +40,9 @@ namespace light_quiz_api.Controllers
                     Description = q.Description ?? string.Empty,
                     StartsAt = q.StartsAt,
                     TimeAllowed = q.DurationMinutes,
-                    NumberOfQuestions = _context.Questions.Count(x => x.QuizId == quizId)
+                    NumberOfQuestions = _context.Questions.Count(x => x.QuizId == quizId),
+                    GroupId = q.GroupId ?? Guid.Empty,
+                    Anonymous = q.Anonymous
                 })
                 .FirstOrDefaultAsync();
 
@@ -51,10 +53,42 @@ namespace light_quiz_api.Controllers
 
             var studentId = GetCurrentUserId();
 
-            var didStartQuiz = await _context.QuizAttempts
-                .AnyAsync(x => x.QuizId == response.QuizId && x.StudentId == studentId);
+            // Check if the student is in the quiz's group
+            var groupId = response.GroupId;
+            var allowsAnonymous = response.Anonymous;
 
-            response.DidStartQuiz = didStartQuiz;
+            // if the quiz doesn't allow anonymous access, check if the student is in the group
+            if (!allowsAnonymous && groupId != Guid.Empty)
+            {
+                var isStudentInGroup = await _context.GroupMembers
+                    .AnyAsync(g => g.GroupId == groupId && g.MemberId == studentId);
+
+                if (!isStudentInGroup)
+                {
+                    return new ObjectResult(new ProblemDetails
+                    {
+                        Title = "Access Denied",
+                        Detail = $"Student with ID: {studentId} is not in the quiz's group.",
+                        Status = StatusCodes.Status403Forbidden,
+                        Type = "https://tools.ietf.org/html/rfc7231#section-6.5.3"
+                    })
+                    {
+                        StatusCode = StatusCodes.Status403Forbidden
+                    };
+                }
+            }
+
+            var pastAttempt = await _context.QuizAttempts
+                .FirstOrDefaultAsync(x => x.QuizId == response.QuizId && x.StudentId == studentId);
+
+            if (pastAttempt?.State == AttemptState.Submitted ||
+                pastAttempt?.State == AttemptState.AutomaticallySubmitted)
+            {
+                return BadRequest($"student with Id: {studentId} has taken this quiz before.");
+            }
+
+            response.DidStartQuiz = pastAttempt?.State == AttemptState.InProgress;
+
 
             return Ok(response);
         }
@@ -71,7 +105,9 @@ namespace light_quiz_api.Controllers
                     Description = q.Description ?? string.Empty,
                     StartsAt = q.StartsAt,
                     TimeAllowed = q.DurationMinutes,
-                    NumberOfQuestions = _context.Questions.Count(x => x.QuizId == q.Id)
+                    NumberOfQuestions = _context.Questions.Count(x => x.QuizId == q.Id),
+                    GroupId = q.GroupId ?? Guid.Empty,
+                    Anonymous = q.Anonymous
                 })
                 .FirstOrDefaultAsync();
 
@@ -81,6 +117,31 @@ namespace light_quiz_api.Controllers
             }
 
             var studentId = GetCurrentUserId();
+
+            // Check if the student is in the quiz's group
+            var groupId = response.GroupId;
+            var allowsAnonymous = response.Anonymous;
+
+            // if the quiz doesn't allow anonymous access, check if the student is in the group
+            if (!allowsAnonymous && groupId != Guid.Empty)
+            {
+                var isStudentInGroup = await _context.GroupMembers
+                    .AnyAsync(g => g.GroupId == groupId && g.MemberId == studentId);
+
+                if (!isStudentInGroup)
+                {
+                    return new ObjectResult(new ProblemDetails
+                    {
+                        Title = "Access Denied",
+                        Detail = $"Student with ID: {studentId} is not in the quiz's group.",
+                        Status = StatusCodes.Status403Forbidden,
+                        Type = "https://tools.ietf.org/html/rfc7231#section-6.5.3"
+                    })
+                    {
+                        StatusCode = StatusCodes.Status403Forbidden
+                    };
+                }
+            }
 
             var pastAttempt= await _context.QuizAttempts
                 .FirstOrDefaultAsync(x => x.QuizId == response.QuizId && x.StudentId == studentId);
@@ -286,11 +347,6 @@ namespace light_quiz_api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateQuiz([FromBody] PostQuizRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var userId = GetCurrentUserId();
             var shortCode = await _shortCodeGenerator.GenerateQuizShortCodeAsync();
 
@@ -301,6 +357,7 @@ namespace light_quiz_api.Controllers
                 StartsAt = request.StartsAtUTC,
                 DurationMinutes = request.DurationMinutes,
                 Anonymous = request.Anonymous ?? false,
+                GroupId = request.GroupId,
                 Randomize = request.Randomize ?? false,
                 CreatedBy = userId,
                 CreatedAt = DateTime.UtcNow,
@@ -309,7 +366,6 @@ namespace light_quiz_api.Controllers
             _context.Quizzes.Add(newQuiz);
 
             var newQuestions = request.Questions.ToList();
-            //var questionTypes = _context.QuestionTypes.ToList();
             foreach (var question in newQuestions)
             {
                 var newQuestion = new Question

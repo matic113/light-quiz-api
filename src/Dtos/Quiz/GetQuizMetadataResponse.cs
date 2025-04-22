@@ -9,5 +9,7 @@
         public DateTime StartsAt { get; set; }
         public int NumberOfQuestions { get; set; }
         public bool DidStartQuiz { get; set; } = false;
+        public Guid? GroupId { get; set; }
+        public bool Anonymous { get; set; } = false;
     }
 }
