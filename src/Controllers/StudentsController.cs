@@ -16,14 +16,12 @@ namespace light_quiz_api.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IGradingService _gradingService;
         private readonly IBackgroundJobClient _backgroundJobClient;
 
-        public StudentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IBackgroundJobClient backgroundJobClient, IGradingService gradingService)
+        public StudentsController(ApplicationDbContext context, IBackgroundJobClient backgroundJobClient, IGradingService gradingService)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
             _backgroundJobClient = backgroundJobClient;
             _gradingService = gradingService;
         }
@@ -298,14 +296,13 @@ namespace light_quiz_api.Controllers
         }
         private Guid GetCurrentUserId()
         {
-            var jtiClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("userId");
+            var userIdClaim = User?.FindFirst("userId");
 
-            if (jtiClaim != null)
+            if (userIdClaim != null)
             {
-                return Guid.Parse(jtiClaim.Value);
+                return Guid.Parse(userIdClaim.Value);
             }
 
-            // Handle the case where the "jti" claim is not found
             return Guid.Empty;
         }
     }

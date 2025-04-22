@@ -15,14 +15,12 @@ namespace light_quiz_api.Controllers
     public class QuizzesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly ILogger<QuizzesController> _logger;
         private readonly ShortCodeGeneratorService _shortCodeGenerator;
-        public QuizzesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<QuizzesController> logger, IBackgroundJobClient backgroundJobClient, ShortCodeGeneratorService shortCodeGenerator)
+        public QuizzesController(ApplicationDbContext context, ILogger<QuizzesController> logger, IBackgroundJobClient backgroundJobClient, ShortCodeGeneratorService shortCodeGenerator)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _backgroundJobClient = backgroundJobClient;
             _shortCodeGenerator = shortCodeGenerator;
@@ -402,14 +400,13 @@ namespace light_quiz_api.Controllers
         }
         private Guid GetCurrentUserId()
         {
-            var jtiClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("userId");
+            var userIdClaim = User?.FindFirst("userId");
 
-            if (jtiClaim != null)
+            if (userIdClaim != null)
             {
-                return Guid.Parse(jtiClaim.Value);
+                return Guid.Parse(userIdClaim.Value);
             }
 
-            // Handle the case where the "jti" claim is not found
             return Guid.Empty;
         }
     }
