@@ -147,6 +147,7 @@ namespace light_quiz_api.Services
                 Id = Guid.NewGuid(),
                 QuizId = quizId,
                 QuizTitle = quiz.Title,
+                QuizShortCode = quiz.ShortCode,
                 UserId = studentId,
                 Grade =totalPoints,
                 PossiblePoints = possiblePoints,
