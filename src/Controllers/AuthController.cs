@@ -101,12 +101,15 @@ namespace light_quiz_api.Controllers
                 await _userManager.UpdateAsync(currentUser);
             }
 
+            var userRoles = await _userManager.GetRolesAsync(currentUser);
+
             var respose = new GetUserInfo
             {
                 Id = currentUser.Id,
                 Email = currentUser.Email ?? "",
                 FullName = currentUser.FullName,
                 AvatarUrl = currentUser.AvatarUrl,
+                Roles = [.. userRoles]
             };
 
             return Ok(respose);
