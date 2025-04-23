@@ -27,4 +27,11 @@ RUN dotnet publish "./light-quiz-api.csproj" -c $BUILD_CONFIGURATION -o /app/pub
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "light-quiz-api.dll"]
+
+# Create a tiny shell script to write the key and start the app
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo 'echo "$SERVICE_KEY_JSON" > /app/serviceKey.json' >> /app/entrypoint.sh && \
+    echo 'exec dotnet light-quiz-api.dll' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
