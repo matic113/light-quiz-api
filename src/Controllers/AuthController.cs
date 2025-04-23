@@ -46,6 +46,30 @@ namespace light_quiz_api.Controllers
             return Ok(new { token = loginResult.Token, expireOn = loginResult.ExpiresOn });
         }
 
+        [HttpPost("update-devicetoken/{deviceToken}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateDeviceTokenAsync(string deviceToken)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId");
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var userIdStringValue = userIdClaim.Value;
+            if (!Guid.TryParse(userIdStringValue, out Guid userIdGuid))
+            {
+                return Unauthorized();
+            }
+            var currentUser = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
+            if (currentUser is null)
+            {
+                return Unauthorized();
+            }
+            currentUser.DeviceToken = deviceToken;
+            await _userManager.UpdateAsync(currentUser);
+            return Ok("Device token updated successfully.");
+        }
+
         [HttpPost("info")]
         [Authorize]
         public IActionResult GetInfo()
