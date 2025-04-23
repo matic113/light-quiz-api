@@ -5,6 +5,7 @@ namespace light_quiz_api.Models
     public class AppUser : IdentityUser<Guid>
     {
         public string FullName { get; set; }
+        public string? AvatarUrl { get; set; }
 
         // Navigational Properties
         public ICollection<GroupMember> GroupMemberships { get; set; }
