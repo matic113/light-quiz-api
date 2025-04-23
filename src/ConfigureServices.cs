@@ -1,5 +1,7 @@
 ﻿
+using FirebaseAdmin;
 using gemini_test.Services;
+using Google.Apis.Auth.OAuth2;
 using Hangfire;
 using Hangfire.PostgreSql;
 using System.Threading.RateLimiting;
@@ -22,6 +24,12 @@ namespace light_quiz_api
 
             //builder.Services.AddSingleton(new BlobServiceClient(blobConnectionString));
             //builder.Services.AddSingleton<IBlobService, FileBlobService>();
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "serviceKey.json"))
+            });
+
+            builder.Services.AddSingleton<INotificationService, NotificationService>();
 
             builder.Services.AddScoped<IGradingService, GradingService>();
             builder.Services.AddScoped<StudentSubmissionService>();
