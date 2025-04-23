@@ -6,6 +6,7 @@ namespace light_quiz_api.Models
     {
         public string FullName { get; set; }
         public string? AvatarUrl { get; set; }
+        public string? DeviceToken { get; set; }
 
         // Navigational Properties
         public ICollection<GroupMember> GroupMemberships { get; set; }
