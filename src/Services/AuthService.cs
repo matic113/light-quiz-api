@@ -13,12 +13,14 @@ namespace light_quiz_api.Services;
 public class AuthService : IAuthService
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly IUserAvatarService _userAvatarService;
     private readonly JWT _jwt;
 
-    public AuthService(UserManager<AppUser> userManager, IOptions<JWT> jwt)
+    public AuthService(UserManager<AppUser> userManager, IOptions<JWT> jwt, IUserAvatarService userAvatarService)
     {
         _userManager = userManager;
         _jwt = jwt.Value;
+        _userAvatarService = userAvatarService;
     }
 
 
@@ -34,11 +36,14 @@ public class AuthService : IAuthService
 
         var userName = request.Email;
 
+        var avatarUrl = _userAvatarService.GenerateAvatarUrl(request.FullName);
+
         var user = new AppUser
         {
             Email = request.Email,
             UserName = userName,
             FullName = request.FullName,
+            AvatarUrl = avatarUrl
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);

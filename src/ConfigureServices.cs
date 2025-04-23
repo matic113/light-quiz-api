@@ -26,6 +26,7 @@ namespace light_quiz_api
             builder.Services.AddScoped<IGradingService, GradingService>();
             builder.Services.AddScoped<StudentSubmissionService>();
             builder.Services.AddScoped<ShortCodeGeneratorService>();
+            builder.Services.AddScoped<IUserAvatarService, UserAvatarService>();
 
             builder.AddGeminiServices();
 
