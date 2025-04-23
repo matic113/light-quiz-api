@@ -243,15 +243,28 @@ namespace light_quiz_api.Controllers
                 return NotFound("Group not found");
             }
 
+            var teacher = group.GroupMembers
+                .FirstOrDefault(gm => gm.MemberId == group.CreatedBy);
+
+            var teacherProfile = new TeacherProfile
+            {
+                Id = teacher.Member.Id,
+                Name = teacher.Member.FullName,
+                Email = teacher.Member.Email ?? string.Empty,
+                AvatarUrl = teacher.Member.AvatarUrl ?? string.Empty,
+            };
+
             var response = new GetGroupResponse
             {
                 GroupId = group.Id,
                 ShortCode = group.ShortCode,
                 Name = group.Name,
+                Teacher = teacherProfile,
                 Members = group.GroupMembers.Select(m => new GroupMemberResponse
                 {
                     MemberName = m.Member.FullName,
                     MemberEmail = m.Member.Email ?? string.Empty,
+                    MemberAvatarUrl = m.Member.AvatarUrl ?? string.Empty,
                 }).ToList(),
             };
             return Ok(response);
