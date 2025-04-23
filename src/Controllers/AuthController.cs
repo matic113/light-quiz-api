@@ -11,11 +11,13 @@ namespace light_quiz_api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IUserAvatarService _userAvatarService;
         private readonly UserManager<AppUser> _userManager;
-        public AuthController(IAuthService authService, UserManager<AppUser> userManager)
+        public AuthController(IAuthService authService, UserManager<AppUser> userManager, IUserAvatarService userAvatarService)
         {
             _authService = authService;
             _userManager = userManager;
+            _userAvatarService = userAvatarService;
         }
 
         [HttpPost("register")]
@@ -70,6 +72,44 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok("Authenticated");
+        }
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<GetUserInfo>> GetMe()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId");
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var userIdStringValue = userIdClaim.Value;
+            if (!Guid.TryParse(userIdStringValue, out Guid userIdGuid))
+            {
+                return Unauthorized();
+            }
+            var currentUser = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
+            if (currentUser is null)
+            {
+                return Unauthorized();
+            }
+
+            if (currentUser.AvatarUrl is null)
+            {
+                var newAvatarUrl = _userAvatarService.GenerateAvatarUrl(currentUser.FullName);
+                currentUser.AvatarUrl = newAvatarUrl;
+                await _userManager.UpdateAsync(currentUser);
+            }
+
+            var respose = new GetUserInfo
+            {
+                Id = currentUser.Id,
+                Email = currentUser.Email ?? "",
+                FullName = currentUser.FullName,
+                AvatarUrl = currentUser.AvatarUrl,
+            };
+
+            return Ok(respose);
         }
     }
 }
