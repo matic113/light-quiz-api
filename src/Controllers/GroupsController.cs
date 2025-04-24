@@ -114,6 +114,51 @@ namespace light_quiz_api.Controllers
 
             return Ok();
         }
+        [HttpPost("remove")]
+        public async Task<IActionResult> RemoveMembersFromGroup(RemoveMembersFromGroupRequest request)
+        {
+            var group = await _context.Groups
+                .Include(g => g.GroupMembers)
+                    .ThenInclude(gm => gm.Member)
+                .FirstOrDefaultAsync(g => g.ShortCode == request.QuizShortCode);
+
+            if (group is null)
+            {
+                return NotFound("Group not found");
+            }
+
+            var userId = GetCurrentUserId();
+
+            if (group.CreatedBy != userId)
+            {
+                return Unauthorized("You are not allowed to add members to this group");
+            }
+
+            var membersToRemove = new List<GroupMember>();
+
+            // Add other members to the group
+            foreach (var memberId in request.MemberIds)
+            {
+                var isAlreadyMember = group.GroupMembers.Any(gm => gm.MemberId == memberId);
+
+                if (!isAlreadyMember) 
+                {
+                    continue; // Skip adding if already not a member
+                }
+
+                var groupMember = new GroupMember
+                {
+                    MemberId = memberId,
+                    GroupId = group.Id,
+                };
+                membersToRemove.Add(groupMember);
+            }
+
+            _context.RemoveRange(membersToRemove);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
 
         [HttpPost("join/{shortCode}")]
         public async Task<IActionResult> JoinGroup(string shortCode)
@@ -312,6 +357,30 @@ namespace light_quiz_api.Controllers
                     }).ToList()
             };
             return Ok(response);
+        }
+        [HttpDelete("{groupId:guid}")]
+        public async Task<IActionResult> DeleteQuiz(Guid groupId)
+        {
+            var group = await _context.Groups.FindAsync(groupId);
+            if (group == null)
+            {
+                return NotFound();
+            }
+            _context.Groups.Remove(group);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        [HttpDelete("{shortCode}")]
+        public async Task<IActionResult> DeleteGroup(string shortCode)
+        {
+            var group = await _context.Groups.FirstOrDefaultAsync(x => x.ShortCode == shortCode);
+            if (group == null)
+            {
+                return NotFound();
+            }
+            _context.Groups.Remove(group);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
         private Guid GetCurrentUserId()
         {
