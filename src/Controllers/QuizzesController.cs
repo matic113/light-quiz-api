@@ -398,6 +398,30 @@ namespace light_quiz_api.Controllers
 
             return CreatedAtAction(nameof(GetQuizMetadataByShortCode), new { shortCode }, null);
         }
+        [HttpDelete("{quizId:guid}")]
+        public async Task<IActionResult> DeleteQuiz(Guid quizId)
+        {
+            var quiz = await _context.Quizzes.FindAsync(quizId);
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+            _context.Quizzes.Remove(quiz);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        [HttpDelete("{shortCode}")]
+        public async Task<IActionResult> DeleteQuiz(string shortCode)
+        {
+            var quiz = await _context.Quizzes.FirstOrDefaultAsync(x => x.ShortCode == shortCode);
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+            _context.Quizzes.Remove(quiz);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User?.FindFirst("userId");
