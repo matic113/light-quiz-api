@@ -187,20 +187,41 @@ namespace light_quiz_api.Controllers
                 .Include(g => g.GroupMembers)
                     .ThenInclude(gm => gm.Member)
                 .Where(g => g.CreatedBy == userId)
-                .Select(g => new GetGroupResponse
-                {
-                    GroupId = g.Id,
-                    ShortCode = g.ShortCode,
-                    Name = g.Name,
-                    Members = g.GroupMembers.Select(m => new GroupMemberResponse
-                    {
-                        MemberName = m.Member.FullName,
-                        MemberEmail = m.Member.Email ?? string.Empty,
-                    }).ToList(),
-                })
                 .ToListAsync();
 
-            return Ok(groups);
+            var response = new List<GetGroupResponse>();
+
+            foreach (var group in groups)
+            {
+                var teacher = group.GroupMembers
+                    .FirstOrDefault(gm => gm.MemberId == group.CreatedBy);
+
+                var teacherProfile = new TeacherProfile
+                {
+                    Id = teacher.Member.Id,
+                    Name = teacher.Member.FullName,
+                    Email = teacher.Member.Email ?? string.Empty,
+                    AvatarUrl = teacher.Member.AvatarUrl ?? string.Empty,
+                };
+
+                response.Add(new GetGroupResponse
+                {
+                    GroupId = group.Id,
+                    ShortCode = group.ShortCode,
+                    Name = group.Name,
+                    Teacher = teacherProfile,
+                    Members = group.GroupMembers
+                        .Where(m => m.MemberId != group.CreatedBy)
+                        .Select(m => new GroupMemberResponse
+                        {
+                            MemberName = m.Member.FullName,
+                            MemberEmail = m.Member.Email ?? string.Empty,
+                            MemberAvatarUrl = m.Member.AvatarUrl ?? string.Empty,
+                        }).ToList()
+                });
+            }
+
+            return Ok(response);
         }
 
         [HttpGet("memberof")]
@@ -213,20 +234,41 @@ namespace light_quiz_api.Controllers
                 .Include(g => g.GroupMembers)
                     .ThenInclude(gm => gm.Member)
                 .Where(g => g.GroupMembers.Any(gm => gm.MemberId == userId))
-                .Select(g => new GetGroupResponse
-                {
-                    GroupId = g.Id,
-                    ShortCode = g.ShortCode,
-                    Name = g.Name,
-                    Members = g.GroupMembers.Select(m => new GroupMemberResponse
-                    {
-                        MemberName = m.Member.FullName,
-                        MemberEmail = m.Member.Email ?? string.Empty,
-                    }).ToList(),
-                })
                 .ToListAsync();
 
-            return Ok(groups);
+            var response = new List<GetGroupResponse>();
+
+            foreach (var group in groups) {
+
+                var teacher = group.GroupMembers
+                    .FirstOrDefault(gm => gm.MemberId == group.CreatedBy);
+
+                var teacherProfile = new TeacherProfile
+                {
+                    Id = teacher.Member.Id,
+                    Name = teacher.Member.FullName,
+                    Email = teacher.Member.Email ?? string.Empty,
+                    AvatarUrl = teacher.Member.AvatarUrl ?? string.Empty,
+                };
+
+                response.Add(new GetGroupResponse
+                {
+                    GroupId = group.Id,
+                    ShortCode = group.ShortCode,
+                    Name = group.Name,
+                    Teacher = teacherProfile,
+                    Members = group.GroupMembers
+                        .Where(m => m.MemberId != group.CreatedBy)
+                        .Select(m => new GroupMemberResponse
+                        {
+                            MemberName = m.Member.FullName,
+                            MemberEmail = m.Member.Email ?? string.Empty,
+                            MemberAvatarUrl = m.Member.AvatarUrl ?? string.Empty,
+                        }).ToList()
+                });
+            }
+
+            return Ok(response);
         }
 
         [HttpGet("{shortCode}")]
@@ -260,12 +302,14 @@ namespace light_quiz_api.Controllers
                 ShortCode = group.ShortCode,
                 Name = group.Name,
                 Teacher = teacherProfile,
-                Members = group.GroupMembers.Select(m => new GroupMemberResponse
-                {
-                    MemberName = m.Member.FullName,
-                    MemberEmail = m.Member.Email ?? string.Empty,
-                    MemberAvatarUrl = m.Member.AvatarUrl ?? string.Empty,
-                }).ToList(),
+                Members = group.GroupMembers
+                    .Where(m => m.MemberId != group.CreatedBy)
+                    .Select(m => new GroupMemberResponse
+                    {
+                        MemberName = m.Member.FullName,
+                        MemberEmail = m.Member.Email ?? string.Empty,
+                        MemberAvatarUrl = m.Member.AvatarUrl ?? string.Empty,
+                    }).ToList()
             };
             return Ok(response);
         }
