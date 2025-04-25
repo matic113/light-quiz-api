@@ -33,7 +33,7 @@ namespace light_quiz_api.Services
         }
         public async Task<string> UploadReportAsync(string reportName, byte[] content)
         {
-            string contentType = "application/vnd"; // excel files
+            string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; // excel files
             return await UploadBlobAsync(reportsContainerName, reportName, content, contentType);
         }
         public async Task<string> UploadPictureAsync(string pictureName, byte[] content)
