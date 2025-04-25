@@ -412,12 +412,15 @@ namespace light_quiz_api.Controllers
                     OptionLetter = x.OptionLetter
                 }).ToList();
 
+                char correctOption = question.QuestionOptions.FirstOrDefault(x => x.IsCorrect)?.OptionLetter ?? default;
+
                 var answerToAdd = new GetQuestionReviewResponse
                 {
                     QuestionText = question.QuestionText,
                     Options = questionOptions,
                     StudentAnsweredText = answer.AnswerText ?? "",
                     StudentAnsweredOption = answer.AnswerOptionLetter ?? null,
+                    CorrectOption = correctOption,
                     Points = answer.Question.Points,
                     IsCorrect = answer.GradingRating > 5,
                     FeedbackMessage = answer.GradingFeedback

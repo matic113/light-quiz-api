@@ -7,6 +7,7 @@
         public int Points { get; set; }
         public string? StudentAnsweredText { get; set; }
         public char? StudentAnsweredOption{ get; set; }
+        public char? CorrectOption { get; set; }
         public bool IsCorrect { get; set; }
         public string? FeedbackMessage { get; set; }
     }
