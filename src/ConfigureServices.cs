@@ -1,4 +1,5 @@
 ﻿
+using Azure.Storage.Blobs;
 using FirebaseAdmin;
 using gemini_test.Services;
 using Google.Apis.Auth.OAuth2;
@@ -19,17 +20,18 @@ namespace light_quiz_api
 
             builder.AddHangfireServices();
 
-            //// Azure Blob Storage
-            //var blobConnectionString = builder.Configuration.GetConnectionString("AzureStorage");
+            var blobConnectionString = builder.Configuration.GetConnectionString("AzureStorage");
 
-            //builder.Services.AddSingleton(new BlobServiceClient(blobConnectionString));
-            //builder.Services.AddSingleton<IBlobService, FileBlobService>();
+            builder.Services.AddSingleton(new BlobServiceClient(blobConnectionString));
+            builder.Services.AddSingleton<FileBlobService>();
+
             FirebaseApp.Create(new AppOptions()
             {
                 Credential = GoogleCredential.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "serviceKey.json"))
             });
 
             builder.Services.AddSingleton<INotificationService, NotificationService>();
+            builder.Services.AddScoped<ReportService>();
 
             builder.Services.AddScoped<IGradingService, GradingService>();
             builder.Services.AddScoped<StudentSubmissionService>();
@@ -93,7 +95,7 @@ namespace light_quiz_api
 
             if (builder.Environment.IsDevelopment())
             {
-                connectionString = builder.Configuration.GetConnectionString("DevConnection");
+                connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             }
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
