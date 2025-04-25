@@ -439,6 +439,8 @@ namespace light_quiz_api.Controllers
                 PossiblePoints = result.PossiblePoints,
                 CorrectQuestions = result.CorrectQuestions ?? 0,
                 TotalQuestions = result.TotalQuestion ?? 0,
+                SubmissionDate = quizAttempt.SubmissionDate,
+                GradingDate = result.CreatedAt,
                 Questions = reviewQuestions
             };
 
