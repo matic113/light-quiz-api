@@ -21,6 +21,11 @@
                 return;
             }
 
+            if (studentAttempt.State == AttemptState.Submitted || studentAttempt.State == AttemptState.Graded)
+            {
+                return;
+            }
+
             studentAttempt.State = AttemptState.AutomaticallySubmitted;
             studentAttempt.SubmissionDate = DateTime.UtcNow;
             await _context.SaveChangesAsync();
