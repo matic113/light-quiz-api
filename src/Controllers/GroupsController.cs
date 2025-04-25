@@ -12,11 +12,13 @@ namespace light_quiz_api.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ShortCodeGeneratorService _codeGenerator;
+        private readonly UserManager<AppUser> _userManager;
 
-        public GroupsController(ApplicationDbContext context, ShortCodeGeneratorService codeGenerator)
+        public GroupsController(ApplicationDbContext context, ShortCodeGeneratorService codeGenerator, UserManager<AppUser> userManager)
         {
             _context = context;
             _codeGenerator = codeGenerator;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -92,18 +94,26 @@ namespace light_quiz_api.Controllers
             var memberToAdd = new List<GroupMember>();
 
             // Add other members to the group
-            foreach (var memberId in request.MemberIds)
+            foreach (var memberEmail in request.MemberEmails)
             {
-                var isAlreadyMember = group.GroupMembers.Any(gm => gm.MemberId == memberId);
+                var email = memberEmail.NormalizedEmail();
+                var member = group.GroupMembers.FirstOrDefault(gm => gm.Member.NormalizedEmail == email);
 
-                if (isAlreadyMember)
+                if (member is not null)
                 {
                     continue; // Skip adding if already a member
                 }
 
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user is null)
+                {
+                    return NotFound($"User with email {memberEmail} not found");
+                }
+
                 var groupMember = new GroupMember
                 {
-                    MemberId = memberId,
+                    MemberId = user.Id,
                     GroupId = group.Id,
                 };
                 memberToAdd.Add(groupMember);
