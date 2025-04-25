@@ -18,12 +18,14 @@ namespace light_quiz_api.Controllers
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly ILogger<QuizzesController> _logger;
         private readonly ShortCodeGeneratorService _shortCodeGenerator;
-        public QuizzesController(ApplicationDbContext context, ILogger<QuizzesController> logger, IBackgroundJobClient backgroundJobClient, ShortCodeGeneratorService shortCodeGenerator)
+        private readonly ReportService _reportService;
+        public QuizzesController(ApplicationDbContext context, ILogger<QuizzesController> logger, IBackgroundJobClient backgroundJobClient, ShortCodeGeneratorService shortCodeGenerator, ReportService reportService)
         {
             _context = context;
             _logger = logger;
             _backgroundJobClient = backgroundJobClient;
             _shortCodeGenerator = shortCodeGenerator;
+            _reportService = reportService;
         }
 
         [HttpGet("metadata/{quizId:guid}")]
@@ -421,6 +423,12 @@ namespace light_quiz_api.Controllers
             _context.Quizzes.Remove(quiz);
             await _context.SaveChangesAsync();
             return Ok();
+        }
+        [HttpPost("report/{shortCode}")]
+        public async Task<IActionResult> GenerateReportForQuiz(string shortCode)
+        {
+            var reportUrl = await _reportService.GenerateQuizReport(shortCode);
+            return Ok(reportUrl);
         }
         private Guid GetCurrentUserId()
         {
