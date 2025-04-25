@@ -259,6 +259,7 @@ namespace light_quiz_api.Controllers
                         .Where(m => m.MemberId != group.CreatedBy)
                         .Select(m => new GroupMemberResponse
                         {
+                            MemberId = m.MemberId,
                             MemberName = m.Member.FullName,
                             MemberEmail = m.Member.Email ?? string.Empty,
                             MemberAvatarUrl = m.Member.AvatarUrl ?? string.Empty,
@@ -306,6 +307,7 @@ namespace light_quiz_api.Controllers
                         .Where(m => m.MemberId != group.CreatedBy)
                         .Select(m => new GroupMemberResponse
                         {
+                            MemberId = m.MemberId,
                             MemberName = m.Member.FullName,
                             MemberEmail = m.Member.Email ?? string.Empty,
                             MemberAvatarUrl = m.Member.AvatarUrl ?? string.Empty,
@@ -351,6 +353,7 @@ namespace light_quiz_api.Controllers
                     .Where(m => m.MemberId != group.CreatedBy)
                     .Select(m => new GroupMemberResponse
                     {
+                        MemberId = m.MemberId,
                         MemberName = m.Member.FullName,
                         MemberEmail = m.Member.Email ?? string.Empty,
                         MemberAvatarUrl = m.Member.AvatarUrl ?? string.Empty,
@@ -359,7 +362,7 @@ namespace light_quiz_api.Controllers
             return Ok(response);
         }
         [HttpDelete("{groupId:guid}")]
-        public async Task<IActionResult> DeleteQuiz(Guid groupId)
+        public async Task<IActionResult> DeleteGroup(Guid groupId)
         {
             var group = await _context.Groups.FindAsync(groupId);
             if (group == null)
