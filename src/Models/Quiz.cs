@@ -10,6 +10,8 @@
         public Guid? GroupId { get; set; }
         public Guid CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int NumberOfQuestions { get; set; }
+        public int PossiblePoints { get; set; } = 0;
         public bool Anonymous { get; set; }
         public bool Randomize { get; set; } = false;
         public string? ShortCode { get; set; }

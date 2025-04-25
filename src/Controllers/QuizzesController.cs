@@ -36,12 +36,14 @@ namespace light_quiz_api.Controllers
                 .Select(q => new GetQuizMetadataResponse
                 {
                     QuizId = q.Id,
+                    ShortCode = q.ShortCode ?? string.Empty,
                     Title = q.Title,
                     Description = q.Description ?? string.Empty,
                     StartsAt = q.StartsAt,
                     TimeAllowed = q.DurationMinutes,
-                    NumberOfQuestions = _context.Questions.Count(x => x.QuizId == quizId),
-                    GroupId = q.GroupId ?? Guid.Empty,
+                    NumberOfQuestions = q.NumberOfQuestions,
+                    PossiblePoints = q.PossiblePoints,
+                    GroupId = q.GroupId ?? null,
                     Anonymous = q.Anonymous
                 })
                 .FirstOrDefaultAsync();
@@ -101,12 +103,14 @@ namespace light_quiz_api.Controllers
                 .Select(q => new GetQuizMetadataResponse
                 {
                     QuizId = q.Id,
+                    ShortCode = q.ShortCode ?? string.Empty,
                     Title = q.Title,
                     Description = q.Description ?? string.Empty,
                     StartsAt = q.StartsAt,
                     TimeAllowed = q.DurationMinutes,
-                    NumberOfQuestions = _context.Questions.Count(x => x.QuizId == q.Id),
-                    GroupId = q.GroupId ?? Guid.Empty,
+                    NumberOfQuestions = q.NumberOfQuestions,
+                    PossiblePoints = q.PossiblePoints,
+                    GroupId = q.GroupId ?? null,
                     Anonymous = q.Anonymous
                 })
                 .FirstOrDefaultAsync();
@@ -154,6 +158,34 @@ namespace light_quiz_api.Controllers
 
             response.DidStartQuiz = pastAttempt?.State == AttemptState.InProgress;
 
+            return Ok(response);
+        }
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<GetQuizMetadataResponse>>> GetQuizzesCreatedMetadata()
+        {
+            var userId = GetCurrentUserId();
+
+            var response = await _context.Quizzes
+                .Where(q => q.CreatedBy == userId)
+                .Select(q => new GetQuizMetadataResponse
+                {
+                    QuizId = q.Id,
+                    ShortCode = q.ShortCode ?? string.Empty,
+                    Title = q.Title,
+                    Description = q.Description ?? string.Empty,
+                    StartsAt = q.StartsAt,
+                    TimeAllowed = q.DurationMinutes,
+                    NumberOfQuestions = q.NumberOfQuestions,
+                    PossiblePoints = q.PossiblePoints,
+                    GroupId = q.GroupId ?? null,
+                    Anonymous = q.Anonymous
+                })
+                .ToListAsync();
+
+            if (response is null)
+            {
+                return NotFound($"No quizzes found for user with Id: {userId}");
+            }
             return Ok(response);
         }
 
@@ -350,12 +382,20 @@ namespace light_quiz_api.Controllers
             var userId = GetCurrentUserId();
             var shortCode = await _shortCodeGenerator.GenerateQuizShortCodeAsync();
 
+            var numeberOfQuestions = request.Questions.Count;
+
+            if (numeberOfQuestions == 0)
+            {
+                return BadRequest("Quiz must have at least one question.");
+            }
+
             var newQuiz = new Quiz{
                 Id = Guid.NewGuid(),
                 Title = request.Title,
                 Description = request.Description,
                 StartsAt = request.StartsAtUTC,
                 DurationMinutes = request.DurationMinutes,
+                NumberOfQuestions = numeberOfQuestions,
                 Anonymous = request.Anonymous ?? false,
                 GroupId = request.GroupId,
                 Randomize = request.Randomize ?? false,
@@ -364,6 +404,8 @@ namespace light_quiz_api.Controllers
                 ShortCode = shortCode,
             };
             _context.Quizzes.Add(newQuiz);
+
+            var possiblePoints = 0;
 
             var newQuestions = request.Questions.ToList();
             foreach (var question in newQuestions)
@@ -394,7 +436,11 @@ namespace light_quiz_api.Controllers
                         _context.QuestionOptions.Add(newOption);
                     }
                 }
+
+                possiblePoints += question.Points;
             }
+
+            newQuiz.PossiblePoints = possiblePoints;
 
             await _context.SaveChangesAsync();
 
