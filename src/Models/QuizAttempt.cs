@@ -9,6 +9,7 @@
         public DateTime AttemptEndTimeUTC { get; set; }
         public DateTime LastSaved { get; set; }
         public AttemptState State { get; set; }
+        public DateTime SubmissionDate { get; set; }
 
         // Navigational properties
         public AppUser Student { get; set; }
@@ -20,6 +21,7 @@
         InProgress,
         Submitted,
         AutomaticallySubmitted,
-        TimedOut
+        TimedOut,
+        Graded
     }
 }

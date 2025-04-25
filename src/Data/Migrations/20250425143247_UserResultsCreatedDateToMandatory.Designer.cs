@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using light_quiz_api.Data;
@@ -11,9 +12,11 @@ using light_quiz_api.Data;
 namespace light_quiz_api.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250425143247_UserResultsCreatedDateToMandatory")]
+    partial class UserResultsCreatedDateToMandatory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -612,10 +615,6 @@ namespace light_quiz_api.Data.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid")
                         .HasColumnName("student_id");
-
-                    b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("submission_date");
 
                     b.HasKey("Id")
                         .HasName("pk_quiz_attempts");
