@@ -185,6 +185,7 @@ namespace light_quiz_api.Controllers
 
             // Update the quiz attempt state to submitted
             pastAttempt.State = AttemptState.Submitted;
+            pastAttempt.SubmissionDate = DateTime.UtcNow;
 
             var quizSubmission = new StudentQuizSubmission
             {

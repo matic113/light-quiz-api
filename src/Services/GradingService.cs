@@ -98,6 +98,7 @@ namespace light_quiz_api.Services
                         }
                     ]
                 }
+                when you give your feedback i want you to format as if you were speaking to the student
                 INPUT:
                 """;
 
@@ -156,6 +157,13 @@ namespace light_quiz_api.Services
                 CreatedAt = DateTime.UtcNow
             };
             await _context.UserResults.AddAsync(finalResult);
+
+            var attempt = await _context.QuizAttempts
+                .Where(qa => qa.StudentId == studentId && qa.QuizId == quizId)
+                .FirstOrDefaultAsync();
+
+            attempt.State = AttemptState.Graded;
+            _context.QuizAttempts.Update(attempt);
 
             await _context.SaveChangesAsync();
         }

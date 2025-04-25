@@ -375,6 +375,75 @@ namespace light_quiz_api.Controllers
 
             return Ok(response);
         }
+        [HttpGet("review/{shortCode}")]
+        public async Task<IActionResult> GetStudentReviewByQuizShortCode(string shortCode)
+        {
+            var studentId = GetCurrentUserId();
+            var quizAttempt = await _context.QuizAttempts
+                .Include(x => x.Quiz)
+                .FirstOrDefaultAsync(x => x.Quiz.ShortCode == shortCode && x.StudentId == studentId);
+
+            if (quizAttempt is null)
+            {
+                _logger.LogWarning("Student with Id: {studentId} didn't take quiz with Id: {shortCode}.", studentId, shortCode);
+                return NotFound($"Student didn't take this quiz yet.");
+            }
+
+            if (quizAttempt.State != AttemptState.Graded)
+            {
+                return BadRequest($"Student with Id: {studentId} is still taking this quiz.");
+            }
+            
+            var answers = await _context.StudentAnswers
+                .Where(x => x.QuizId == quizAttempt.QuizId && x.UserId == studentId)
+                .Include(x => x.Question)
+                    .ThenInclude(q => q.QuestionOptions)
+                .ToListAsync();
+
+            var reviewQuestions = new List<GetQuestionReviewResponse>();
+
+            foreach(var answer in answers)
+            {
+                var question = answer.Question;
+                var questionOptions = question.QuestionOptions.Select(x => new GetQuestionOptionsResponse
+                {
+                    OptionId = x.Id,
+                    OptionText = x.OptionText,
+                    OptionLetter = x.OptionLetter
+                }).ToList();
+
+                var answerToAdd = new GetQuestionReviewResponse
+                {
+                    QuestionText = question.QuestionText,
+                    Options = questionOptions,
+                    StudentAnsweredText = answer.AnswerText ?? "",
+                    StudentAnsweredOption = answer.AnswerOptionLetter ?? null,
+                    Points = answer.Question.Points,
+                    IsCorrect = answer.GradingRating > 5,
+                    FeedbackMessage = answer.GradingFeedback
+                };
+
+                reviewQuestions.Add(answerToAdd);
+            }
+
+            var result = await _context.UserResults
+                            .Where(x => x.UserId == studentId && x.QuizShortCode == shortCode)
+                            .FirstOrDefaultAsync();
+
+            var response = new GetQuizReviewResponse{
+                QuizId = quizAttempt.QuizId,
+                ShortCode = shortCode,
+                Title = quizAttempt.Quiz.Title,
+                Description = quizAttempt.Quiz.Description ?? string.Empty,
+                Grade = result.Grade,
+                PossiblePoints = result.PossiblePoints,
+                CorrectQuestions = result.CorrectQuestions ?? 0,
+                TotalQuestions = result.TotalQuestion ?? 0,
+                Questions = reviewQuestions
+            };
+
+            return Ok(response);
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateQuiz([FromBody] PostQuizRequest request)

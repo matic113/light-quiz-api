@@ -22,6 +22,7 @@
             }
 
             studentAttempt.State = AttemptState.AutomaticallySubmitted;
+            studentAttempt.SubmissionDate = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             // run the autograding
