@@ -220,6 +220,7 @@ namespace light_quiz_api.Controllers
                                 {
                                     StudentId = ur.UserId,
                                     QuizId = ur.QuizId,
+                                    QuizShortCode = ur.QuizShortCode ?? string.Empty,
                                     Grade = ur.Grade,
                                     QuizTitle = ur.QuizTitle ?? string.Empty,
                                     PossiblePoints = ur.PossiblePoints,
@@ -251,6 +252,7 @@ namespace light_quiz_api.Controllers
                                 {
                                     StudentId = ur.UserId,
                                     QuizId = ur.QuizId,
+                                    QuizShortCode = ur.QuizShortCode,
                                     Grade = ur.Grade,
                                     QuizTitle = ur.QuizTitle ?? string.Empty,
                                     PossiblePoints = ur.PossiblePoints,
@@ -279,6 +281,7 @@ namespace light_quiz_api.Controllers
                                     {
                                         StudentId = ur.UserId,
                                         QuizId = ur.QuizId,
+                                        QuizShortCode = ur.QuizShortCode ?? string.Empty,
                                         Grade = ur.Grade,
                                         QuizTitle = ur.QuizTitle ?? string.Empty,
                                         PossiblePoints = ur.PossiblePoints,

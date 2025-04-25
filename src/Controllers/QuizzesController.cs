@@ -412,7 +412,7 @@ namespace light_quiz_api.Controllers
                     OptionLetter = x.OptionLetter
                 }).ToList();
 
-                char correctOption = question.QuestionOptions.FirstOrDefault(x => x.IsCorrect)?.OptionLetter ?? default;
+                char? correctOption = question.QuestionOptions.FirstOrDefault(x => x.IsCorrect)?.OptionLetter ?? null;
 
                 var answerToAdd = new GetQuestionReviewResponse
                 {
