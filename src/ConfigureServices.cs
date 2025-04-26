@@ -30,7 +30,7 @@ namespace light_quiz_api
                 Credential = GoogleCredential.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "serviceKey.json"))
             });
 
-            builder.Services.AddSingleton<INotificationService, NotificationService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<ReportService>();
 
             builder.Services.AddScoped<IGradingService, GradingService>();

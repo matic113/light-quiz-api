@@ -66,6 +66,8 @@ namespace light_quiz_api.Services
         }
         public async Task NotifyGroupForQuizAsync(Guid groupId)
         {
+            _logger.LogInformation($"Notifying group {groupId} for quiz");
+
             var group = await _context.Groups
                 .Include(g => g.GroupMembers)
                     .ThenInclude(gm => gm.Member)
@@ -78,37 +80,32 @@ namespace light_quiz_api.Services
                 return;
             }
 
-            var members = group.GroupMembers.Select(g => g.Member).ToList();
-            var tokens = members.Select(m => m.DeviceToken).ToList();
+            var tokens = group.GroupMembers
+                .Select(g => g.Member)
+                .Where(m => !string.IsNullOrEmpty(m.DeviceToken))
+                .Select(m => m.DeviceToken)
+                .ToList();
 
             if (tokens.Count == 0)
             {
-                _logger.LogWarning($"No device tokens found for group {groupId}");
+                _logger.LogWarning($"No valid device tokens found for group {groupId}");
                 return;
             }
 
             var latestQuiz = group.Quizzes
                 .OrderBy(q => q.StartsAt)
                 .FirstOrDefault();
+
             if (latestQuiz is null)
             {
                 _logger.LogWarning($"No quizzes found for group {groupId}");
                 return;
             }
 
-            // Send notification to all members of the group
-            var message = new MulticastMessage()
-            {
-                Tokens = tokens,
-                Notification = new Notification()
-                {
-                    Title = $"Quiz: {latestQuiz.Title} is upcoming",
-                    Body = $"A new quiz is available for group {group.Name}"
-                }
-            };
+            var notificationTitle = $"Quiz: {latestQuiz.Title} is upcoming";
+            var notificationBody = $"A new quiz is available for group {group.Name}";
 
-            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
-            Console.WriteLine($"Successfully sent message to {response.SuccessCount} devices out of {tokens.Count} tokens.");
+            await SendNotificationToAll(userTokens: [.. tokens], title: notificationTitle, body: notificationBody);
         }
     }
 }

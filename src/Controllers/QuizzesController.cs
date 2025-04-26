@@ -520,8 +520,9 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
             if (request.Anonymous != true && request.GroupId != null)
             {
-
                 var notificationTime = newQuiz.StartsAt.AddMinutes(-10);
+
+                _logger.LogInformation($"Scheduling notification for group {request.GroupId} in {notificationTime}");
 
                 _backgroundJobClient.Schedule<NotificationService>(
                     service => service.NotifyGroupForQuizAsync(request.GroupId ?? Guid.Empty),
