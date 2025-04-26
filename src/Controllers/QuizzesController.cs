@@ -6,6 +6,7 @@ using light_quiz_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace light_quiz_api.Controllers
 {
@@ -517,7 +518,16 @@ namespace light_quiz_api.Controllers
             newQuiz.PossiblePoints = possiblePoints;
 
             await _context.SaveChangesAsync();
+            if (request.Anonymous != true && request.GroupId != null)
+            {
 
+                var notificationTime = newQuiz.StartsAt.AddMinutes(-10);
+
+                _backgroundJobClient.Schedule<NotificationService>(
+                    service => service.NotifyGroupForQuizAsync(request.GroupId ?? Guid.Empty),
+                    notificationTime
+                    ); 
+            }
             return CreatedAtAction(nameof(GetQuizMetadataByShortCode), new { shortCode }, null);
         }
         [HttpDelete("{quizId:guid}")]
