@@ -156,11 +156,8 @@ namespace light_quiz_api.Controllers
                     continue; // Skip adding if already not a member
                 }
 
-                var groupMember = new GroupMember
-                {
-                    MemberId = memberId,
-                    GroupId = group.Id,
-                };
+                var groupMember = group.GroupMembers.FirstOrDefault(gm => gm.MemberId == memberId);
+
                 membersToRemove.Add(groupMember);
             }
 
