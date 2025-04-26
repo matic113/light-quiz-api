@@ -518,17 +518,29 @@ namespace light_quiz_api.Controllers
             newQuiz.PossiblePoints = possiblePoints;
 
             await _context.SaveChangesAsync();
+
             if (request.Anonymous != true && request.GroupId != null)
             {
+                // Send immediate Notification
+                var group = await _context.Groups
+                    .FirstOrDefaultAsync(g => g.Id == request.GroupId);
+
+                var notificationTitle = $"Quiz: {newQuiz.Title} is upcoming";
+                var notificationBody = $"a new quiz for group {group.Name} on {newQuiz.StartsAt}";
+
+                _backgroundJobClient.Enqueue<NotificationService>(service => service.NotifyGroupAsync((Guid)newQuiz.GroupId, notificationTitle, notificationBody));
+
+                // Schedule notification 10 minutes before the quiz starts
                 var notificationTime = newQuiz.StartsAt.AddMinutes(-10);
 
                 _logger.LogInformation($"Scheduling notification for group {request.GroupId} in {notificationTime}");
 
                 _backgroundJobClient.Schedule<NotificationService>(
-                    service => service.NotifyGroupForQuizAsync(request.GroupId ?? Guid.Empty),
+                    service => service.NotifyGroupForQuizAsync((Guid)newQuiz.GroupId, newQuiz.Id),
                     notificationTime
                     ); 
             }
+
             return CreatedAtAction(nameof(GetQuizMetadataByShortCode), new { shortCode }, null);
         }
         [HttpDelete("{quizId:guid}")]

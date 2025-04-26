@@ -20,7 +20,7 @@ namespace light_quiz_api.Services
         {
             await FirebaseMessaging.DefaultInstance.UnsubscribeFromTopicAsync(userTokens, topic);
         }
-        public async Task SendNotificationToAll(string[] userTokens,string title, string body)
+        public async Task SendNotificationToAll(string[] userTokens, string title, string body)
         {
             var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(new MulticastMessage()
             {
@@ -64,14 +64,39 @@ namespace light_quiz_api.Services
 
             Console.WriteLine($"Successfully sent message to topic: {response}");
         }
-        public async Task NotifyGroupForQuizAsync(Guid groupId)
+        public async Task NotifyGroupForQuizAsync(Guid groupId, Guid quizId)
+        {
+            _logger.LogInformation($"Notifying group {groupId} for quiz");
+
+            var quiz = _context.Quizzes
+                .FirstOrDefault(q => q.Id == quizId);
+
+            if (quiz is null)
+            {
+                _logger.LogWarning($"No quizzes found for group {groupId}");
+                return;
+            }
+
+            var group = await _context.Groups.FirstOrDefaultAsync(q => q.Id == groupId);
+
+            if (group is null)
+            {
+                _logger.LogWarning($"No group is associated with quiz {quizId}");
+                return;
+            }
+
+            var notificationTitle = $"Quiz: {quiz.Title} is upcoming";
+            var notificationBody = $"A new quiz is available for group {group.Name}";
+
+            await NotifyGroupAsync(groupId, notificationTitle, notificationBody);
+        }
+        public async Task NotifyGroupAsync(Guid groupId, string notificationTitle, string notificationBody)
         {
             _logger.LogInformation($"Notifying group {groupId} for quiz");
 
             var group = await _context.Groups
                 .Include(g => g.GroupMembers)
                     .ThenInclude(gm => gm.Member)
-                .Include(g => g.Quizzes)
                 .SingleOrDefaultAsync(g => g.Id == groupId);
 
             if (group is null)
@@ -91,19 +116,6 @@ namespace light_quiz_api.Services
                 _logger.LogWarning($"No valid device tokens found for group {groupId}");
                 return;
             }
-
-            var latestQuiz = group.Quizzes
-                .OrderBy(q => q.StartsAt)
-                .FirstOrDefault();
-
-            if (latestQuiz is null)
-            {
-                _logger.LogWarning($"No quizzes found for group {groupId}");
-                return;
-            }
-
-            var notificationTitle = $"Quiz: {latestQuiz.Title} is upcoming";
-            var notificationBody = $"A new quiz is available for group {group.Name}";
 
             await SendNotificationToAll(userTokens: [.. tokens], title: notificationTitle, body: notificationBody);
         }
