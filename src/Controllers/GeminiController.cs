@@ -10,12 +10,10 @@ namespace light_quiz_api.Controllers
     {
         private readonly IGeminiService _geminiService;
         private readonly ILogger<GeminiController> _logger;
-        private readonly INotificationService notificationService;
-        public GeminiController(IGeminiService geminiService, ILogger<GeminiController> logger, IBackgroundJobClient backgroundJobClient, IGradingService gradingService, INotificationService notificationService)
+        public GeminiController(IGeminiService geminiService, ILogger<GeminiController> logger, IBackgroundJobClient backgroundJobClient, IGradingService gradingService)
         {
             _geminiService = geminiService;
             _logger = logger;
-            this.notificationService = notificationService;
         }
 
         public record PromptRequest(string Prompt);
@@ -52,25 +50,6 @@ namespace light_quiz_api.Controllers
                 // Catch any unexpected exceptions bubbled up from the service
                 _logger.LogError(ex, "An unexpected error occurred while processing the prompt: {Prompt}", request.Prompt);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
-            }
-        }
-
-        [HttpPost("notify")]
-        public async Task<IActionResult> SendNotificationToDevice([FromBody] NotificationRequest request)
-        {
-            if (request == null || string.IsNullOrWhiteSpace(request.DeviceToken) || string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Body))
-            {
-                return BadRequest("Device token, title, and body cannot be empty.");
-            }
-            try
-            {
-                await notificationService.SendNotificationToDevice(request.DeviceToken, request.Title, request.Body);
-                return Ok("Notification sent successfully.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send notification to device: {DeviceToken}", request.DeviceToken);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to send notification.");
             }
         }
     }
