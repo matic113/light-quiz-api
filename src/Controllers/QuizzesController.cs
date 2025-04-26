@@ -161,6 +161,60 @@ namespace light_quiz_api.Controllers
 
             return Ok(response);
         }
+        [HttpGet("metadata/group/{shortCode}")]
+        public async Task<ActionResult<GetQuizMetadataResponse>> GetQuizMetadataByGroupShortCode(string shortCode)
+        {
+            var group = await _context.Groups
+                .Include(g => g.GroupMembers)
+                .FirstOrDefaultAsync(g => g.ShortCode == shortCode);
+
+            if(group is null)
+            {
+                return NotFound($"group with shortCode: {shortCode} doesn't exist");
+            }
+
+            var studentId = GetCurrentUserId();
+
+            var isStudentInGroup = group.GroupMembers
+                .Any(g => g.MemberId == studentId);
+
+            if (!isStudentInGroup)
+            {
+                return new ObjectResult(new ProblemDetails
+                {
+                    Title = "Access Denied",
+                    Detail = $"Student with ID: {studentId} is not in the quiz's group.",
+                    Status = StatusCodes.Status403Forbidden,
+                    Type = "https://tools.ietf.org/html/rfc7231#section-6.5.3"
+                })
+                {
+                    StatusCode = StatusCodes.Status403Forbidden
+                };
+            }
+
+            var response = await _context.Quizzes
+                .Where(q => q.GroupId == group.Id)
+                .Select(q => new GetQuizMetadataResponse
+                {
+                    QuizId = q.Id,
+                    ShortCode = q.ShortCode ?? string.Empty,
+                    Title = q.Title,
+                    Description = q.Description ?? string.Empty,
+                    StartsAt = q.StartsAt,
+                    TimeAllowed = q.DurationMinutes,
+                    NumberOfQuestions = q.NumberOfQuestions,
+                    PossiblePoints = q.PossiblePoints,
+                    GroupId = q.GroupId ?? null,
+                    Anonymous = q.Anonymous
+                })
+                .ToListAsync();
+
+            if (response is null)
+            {
+                return NotFound($"No quizzes found for group with shortcode: {shortCode}");
+            }
+            return Ok(response);
+        }
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<GetQuizMetadataResponse>>> GetQuizzesCreatedMetadata()
         {
