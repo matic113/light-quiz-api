@@ -1,6 +1,7 @@
 ﻿using light_quiz_api.Dtos.Analytics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace light_quiz_api.Controllers
 {
@@ -157,6 +158,39 @@ namespace light_quiz_api.Controllers
                 PossiblePoints = quiz.PossiblePoints,
                 StudentGrades = studentGrades,
                 StudentSecondsSpent = secondsSpent
+            };
+
+            return Ok(response);
+        }
+        [HttpGet("quiz/{shortCode}/top-questions")]
+        public async Task<ActionResult<TopQuestionsResponse>> GetTopQuestionsAnswered(string shortCode, [FromQuery] int limit = 2)
+        {
+            var quiz = await _context.Quizzes
+                .Include(q => q.Questions)
+                    .ThenInclude(q => q.StudentAnswers)
+                .FirstOrDefaultAsync(q => q.ShortCode == shortCode);
+
+            if (quiz is null)
+            {
+                return NotFound(new { Message = "Quiz not found." });
+            }
+
+            var questionsList = quiz.Questions.Select(q => new AnalyticsQuestionResponse
+            {
+                QuestionText = q.QuestionText,
+                CorrectAnswers = q.StudentAnswers.Count(a => a.GradingRating > 5),
+                WrongAnswers = q.StudentAnswers.Count(a => a.GradingRating <= 5),
+                TotalAnswers = q.StudentAnswers.Count()
+            }).ToList();
+
+            var topTwo = questionsList.OrderBy(x => x.CorrectAnswers).Take(limit).ToList();
+            var botTwo = questionsList.OrderBy(x => x.WrongAnswers).Take(limit).ToList();
+
+            var response = new TopQuestionsResponse
+            {
+                QuizShortCode = shortCode,
+                EasiestQuestions = topTwo,
+                HardestQuestions = botTwo,
             };
 
             return Ok(response);
