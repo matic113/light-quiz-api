@@ -87,7 +87,7 @@ namespace light_quiz_api
                     }
                 });
 
-                options.DocumentFilter<HideSchemasFilter>();
+                //options.DocumentFilter<HideSchemasFilter>();
             });
         }
 
