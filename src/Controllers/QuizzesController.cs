@@ -589,9 +589,6 @@ namespace light_quiz_api.Controllers
             if (request.Anonymous != true && request.GroupId != null)
             {
                 // Send immediate Notification
-                var group = await _context.Groups
-                    .FirstOrDefaultAsync(g => g.Id == request.GroupId);
-
                 var notificationTitle = $"Quiz: {newQuiz.Title} is upcoming";
                 var notificationBody = $"a new quiz for group {group.Name} on {newQuiz.StartsAt}";
 
