@@ -536,16 +536,6 @@ namespace light_quiz_api.Controllers
             };
             _context.Quizzes.Add(newQuiz);
 
-            // group
-            var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == request.GroupId);
-
-            if(group is null)
-            {
-                return BadRequest("Group doesn't exist.");
-            }
-
-            newQuiz.GroupId = group.Id;
-
             var possiblePoints = 0;
 
             var newQuestions = request.Questions.ToList();
@@ -586,8 +576,20 @@ namespace light_quiz_api.Controllers
 
             await _context.SaveChangesAsync();
 
-            if (request.Anonymous != true && request.GroupId != null)
-            {
+            var isValidGroupId = request.GroupId is not null || request.GroupId != Guid.Empty;
+
+            if (isValidGroupId && request.Anonymous == false) {
+                // add the group to quiz
+                var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == request.GroupId);
+
+                if (group is null)
+                {
+                    return BadRequest("Group doesn't exist.");
+                }
+
+                newQuiz.GroupId = group.Id;
+                await _context.SaveChangesAsync();
+
                 // Send immediate Notification
                 var notificationTitle = $"Quiz: {newQuiz.Title} is upcoming";
                 var notificationBody = $"a new quiz for group {group.Name} on {newQuiz.StartsAt}";
