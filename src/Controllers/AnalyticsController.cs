@@ -143,7 +143,12 @@ namespace light_quiz_api.Controllers
                 }
             }
 
-            var numberOfStudents = quiz.Group.GroupMembers.Count();
+            var numberOfStudents = 0;
+
+            if(quiz.Group is not null)
+            {
+                numberOfStudents = quiz.Group.GroupMembers.Count();
+            }
 
             var response = new GetQuizAnalyticsResponse
             {
