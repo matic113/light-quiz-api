@@ -183,8 +183,8 @@ namespace light_quiz_api.Controllers
                 TotalAnswers = q.StudentAnswers.Count()
             }).ToList();
 
-            var topTwo = questionsList.OrderBy(x => x.CorrectAnswers).Take(limit).ToList();
-            var botTwo = questionsList.OrderBy(x => x.WrongAnswers).Take(limit).ToList();
+            var topTwo = questionsList.OrderByDescending(x => x.CorrectAnswers).Take(limit).ToList();
+            var botTwo = questionsList.OrderByDescending(x => x.WrongAnswers).Take(limit).ToList();
 
             var response = new TopQuestionsResponse
             {
