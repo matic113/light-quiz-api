@@ -3,6 +3,7 @@
     public class GetQuestionReviewResponse
     {
         public string QuestionText { get; set; }
+        public string? ImageUrl { get; set; }
         public List<GetQuestionOptionsResponse>? Options{ get; set; }
         public int Points { get; set; }
         public string? StudentAnsweredText { get; set; }

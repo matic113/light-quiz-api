@@ -4,6 +4,7 @@
     {
         public string QuestionText { get; set; }
         public int QuestionTypeId { get; set; }
+        public string? ImageUrl { get; set; }
         public int Points{ get; set; }
         public string? CorrectAnswer{ get; set; }
         public int QuestionNumber { get; set; }

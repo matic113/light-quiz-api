@@ -304,6 +304,7 @@ namespace light_quiz_api.Controllers
                     QuizId = quizId,
                     QuestionId = q.Id,
                     Text = q.QuestionText,
+                    ImageUrl = q.ImageUrl,
                     TypeId = q.QuestionTypeId,
                     Points = q.Points,
                     Options = q.QuestionOptions.Select(o => new GetQuestionOptionsResponse
@@ -372,6 +373,7 @@ namespace light_quiz_api.Controllers
                     QuizId = quizId,
                     QuestionId = q.Id,
                     Text = q.QuestionText,
+                    ImageUrl = q.ImageUrl,
                     TypeId = q.QuestionTypeId,
                     Points = q.Points,
                     Options = q.QuestionOptions.Select(o => new GetQuestionOptionsResponse
@@ -472,6 +474,7 @@ namespace light_quiz_api.Controllers
                 var answerToAdd = new GetQuestionReviewResponse
                 {
                     QuestionText = question.QuestionText,
+                    ImageUrl = question.ImageUrl,
                     Options = questionOptions,
                     StudentAnsweredText = answer.AnswerText ?? "",
                     StudentAnsweredOption = answer.AnswerOptionLetter ?? null,
@@ -545,6 +548,7 @@ namespace light_quiz_api.Controllers
                     QuizId = newQuiz.Id,
                     QuestionText = question.QuestionText,
                     QuestionTypeId = question.QuestionTypeId,
+                    ImageUrl = question.ImageUrl,
                     Points = question.Points,
                     CorrectAnswer = question.CorrectAnswer,
                     QuestionNumber = question.QuestionNumber
