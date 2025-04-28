@@ -529,13 +529,22 @@ namespace light_quiz_api.Controllers
                 DurationMinutes = request.DurationMinutes,
                 NumberOfQuestions = numeberOfQuestions,
                 Anonymous = request.Anonymous ?? false,
-                GroupId = request.GroupId,
                 Randomize = request.Randomize ?? false,
                 CreatedBy = userId,
                 CreatedAt = DateTime.UtcNow,
                 ShortCode = shortCode,
             };
             _context.Quizzes.Add(newQuiz);
+
+            // group
+            var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == request.GroupId);
+
+            if(group is null)
+            {
+                return BadRequest("Group doesn't exist.");
+            }
+
+            newQuiz.GroupId = group.Id;
 
             var possiblePoints = 0;
 
