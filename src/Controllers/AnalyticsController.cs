@@ -44,7 +44,7 @@ namespace light_quiz_api.Controllers
                 var currentStudent = studentsResponse.FirstOrDefault(s => s.StudentId == attempt.StudentId);
                 if (currentStudent != null)
                 {
-                    // Minutes
+                    // Seconds
                     currentStudent.SecondsSpent = (int)(attempt.SubmissionDate - attempt.AttemptStartTimeUTC).TotalSeconds;
                     currentStudent.SubmissionDate = attempt.SubmissionDate;
                 }
@@ -92,7 +92,7 @@ namespace light_quiz_api.Controllers
                 var currentStudent = studentsResponse.FirstOrDefault(s => s.StudentId == attempt.StudentId);
                 if (currentStudent != null)
                 {
-                    // Minutes
+                    // Seconds
                     currentStudent.SecondsSpent = (int)(attempt.SubmissionDate - attempt.AttemptStartTimeUTC).TotalSeconds;
                     currentStudent.SubmissionDate = attempt.SubmissionDate;
                 }
@@ -108,6 +108,55 @@ namespace light_quiz_api.Controllers
             {
                 QuizId = quiz.Id,
                 StudentsGrades = topStudents
+            };
+
+            return Ok(response);
+        }
+        [HttpGet("quiz/{shortCode}")]
+        public async Task<ActionResult<GetQuizAnalyticsResponse>> GetQuizAnalytics(string shortCode)
+        {
+            var quiz = await _context.Quizzes.Where(q => q.ShortCode == shortCode)
+                .Include(q => q.QuizAttempts)
+                .Include(q => q.UserResults)
+                .Include(q => q.Group)
+                   .ThenInclude(g => g.GroupMembers)
+                .FirstOrDefaultAsync();
+
+            if (quiz is null)
+            {
+                return NotFound(new { Message = "Quiz not found." });
+            }
+
+            var secondsSpent = new List<int>();
+            var studentGrades = new List<int>();
+
+            foreach (var attempt in quiz.QuizAttempts)
+            {
+                // for each attempt, get the student who took the quiz
+                var currentStudent = quiz.UserResults.FirstOrDefault(s => s.UserId == attempt.StudentId);
+                if (currentStudent != null)
+                {
+                    // Seconds
+                    secondsSpent.Add((int)(attempt.SubmissionDate - attempt.AttemptStartTimeUTC).TotalSeconds);
+                    studentGrades.Add(currentStudent.Grade);
+                }
+            }
+
+            var numberOfStudents = quiz.Group.GroupMembers.Count();
+
+            var response = new GetQuizAnalyticsResponse
+            {
+                QuizId = quiz.Id,
+                QuizShortCode = quiz.ShortCode ?? string.Empty,
+                QuizName = quiz.Title,
+                QuizDateTime = quiz.StartsAt,
+                NumberOfQuestions = quiz.NumberOfQuestions,
+                QuizDuration = quiz.DurationMinutes,
+                NumberOfStudents = numberOfStudents,
+                StudentsAttended = quiz.QuizAttempts.Count(),
+                PossiblePoints = quiz.PossiblePoints,
+                StudentGrades = studentGrades,
+                StudentSecondsSpent = secondsSpent
             };
 
             return Ok(response);
