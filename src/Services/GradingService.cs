@@ -165,6 +165,11 @@ namespace light_quiz_api.Services
             attempt.State = AttemptState.Graded;
             _context.QuizAttempts.Update(attempt);
 
+            var secondsTaken = (attempt.SubmissionDate - attempt.AttemptStartTimeUTC).TotalSeconds;
+            finalResult.SecondsTaken = (int)secondsTaken;
+
+            _context.UserResults.Update(finalResult);
+
             await _context.SaveChangesAsync();
         }
         public static string ExtractJsonFromMarkdown(string markdown)

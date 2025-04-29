@@ -1,4 +1,5 @@
 ﻿using light_quiz_api.Dtos.Analytics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -7,6 +8,7 @@ namespace light_quiz_api.Controllers
 {
     [Route("api/analytics")]
     [ApiController]
+    [Authorize(Roles = "teacher")]
     public class AnalyticsController : ControllerBase
     {
         private readonly ILogger<AnalyticsController> _logger;
@@ -199,6 +201,129 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
+        }
+
+        [HttpGet("group/{shortCode}/top-performers")]
+        public async Task<ActionResult<IEnumerable<TopStudentsResponse>>> GetTopPerformersForGroup(string shortCode, [FromQuery] int limit = 3)
+        {
+            var group = await _context.Groups
+                .Where(g => g.ShortCode == shortCode)
+                .Include(g => g.Quizzes)
+                    .ThenInclude(q => q.UserResults)
+                        .ThenInclude(ur => ur.User)
+                .FirstOrDefaultAsync();
+
+            if (group is null)
+            {
+                return NotFound(new { Message = "Group not found." });
+            }
+
+            var allUserResults = group.Quizzes.SelectMany(q => q.UserResults).ToList();
+
+            var studentPerformance = allUserResults
+                .GroupBy(ur => ur.User)
+                .Select(group => new TopPerformerResponse
+                {
+                    UserId = group.Key.Id,
+                    Name = group.Key.FullName,
+                    AvatarUrl = group.Key.AvatarUrl ?? string.Empty,
+                    QuizzesTaken = group.Count(),
+                    TotalScore = group.Sum(ur => ur.Grade),
+                    AvgTimeSeconds = (int)group.Average(ur => ur.SecondsTaken)
+                })
+                .OrderByDescending(x => x.TotalScore)
+                .ThenBy(x => x.AvgTimeSeconds)
+                .Take(limit)
+                .ToList();
+
+            return Ok(studentPerformance);
+        }
+        [HttpGet("group/{shortCode}/bot-performers")]
+        public async Task<ActionResult<IEnumerable<TopStudentsResponse>>> GetBottomPerformersForGroup(string shortCode, [FromQuery] int limit = 3)
+        {
+            var group = await _context.Groups
+                .Where(g => g.ShortCode == shortCode)
+                .Include(g => g.Quizzes)
+                    .ThenInclude(q => q.UserResults)
+                        .ThenInclude(ur => ur.User)
+                .FirstOrDefaultAsync();
+
+            if (group is null)
+            {
+                return NotFound(new { Message = "Group not found." });
+            }
+
+            var allUserResults = group.Quizzes.SelectMany(q => q.UserResults).ToList();
+
+            var studentPerformance = allUserResults
+                .GroupBy(ur => ur.User)
+                .Select(group => new TopPerformerResponse
+                {
+                    UserId = group.Key.Id,
+                    Name = group.Key.FullName,
+                    AvatarUrl = group.Key.AvatarUrl ?? string.Empty,
+                    QuizzesTaken = group.Count(),
+                    TotalScore = group.Sum(ur => ur.Grade),
+                    AvgTimeSeconds = (int)group.Average(ur => ur.SecondsTaken)
+                })
+                .OrderBy(x => x.TotalScore)
+                .ThenByDescending(x => x.AvgTimeSeconds)
+                .Take(limit)
+                .ToList();
+
+            return Ok(studentPerformance);
+        }
+
+        [HttpGet("groups/stats")]
+        public async Task<ActionResult<TeacherStatsResponse>> GetTeacherStatsForGroup()
+        {
+            var userId = GetCurrentUserId();
+
+            var groups = await _context.Groups
+                .Where(g => g.CreatedBy == userId)
+                .Include(g => g.GroupMembers)
+                .Include(g => g.Quizzes)
+                    .ThenInclude(q => q.UserResults)
+                .ToListAsync();
+
+            if (groups is null)
+            {
+                return NotFound(new { Message = "No Groups Found." });
+            }
+
+            var quizzesCreated = groups.SelectMany(g => g.Quizzes).Count();
+            var totalStudents = groups.SelectMany(g => g.GroupMembers).Count();
+
+            var totalQuestions = groups
+                .Where(g => g.Quizzes != null)
+                .SelectMany(g => g.Quizzes)
+                .Sum(q => q.NumberOfQuestions);
+
+            var upcomingQuizzesCount = groups.SelectMany(g => g.Quizzes).Count(q => q.StartsAt > DateTime.UtcNow);
+
+            var response = new TeacherStatsResponse
+            {
+                UserId = userId,
+                TotalGroups = groups.Count(),
+                TotalStudents = totalStudents,
+                QuizzesCreated = quizzesCreated,
+                TotalQuestions = totalQuestions,
+                UpcomingQuizzesCount = upcomingQuizzesCount
+            };
+
+            return Ok(response);
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User?.FindFirst("userId");
+
+            if (userIdClaim != null)
+            {
+                return Guid.Parse(userIdClaim.Value);
+            }
+
+            return Guid.Empty;
         }
     }
 }
