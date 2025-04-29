@@ -11,6 +11,7 @@
         public int PossiblePoints { get; set; } = 0;
         public int? CorrectQuestions { get; set; }
         public int? TotalQuestion { get; set; }
+        public int SecondsTaken { get; set; } = 0;
         public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
         // Navigational properties
