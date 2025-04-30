@@ -168,7 +168,8 @@ namespace light_quiz_api.Services
             var secondsTaken = (attempt.SubmissionDate - attempt.AttemptStartTimeUTC).TotalSeconds;
             finalResult.SecondsTaken = (int)secondsTaken;
 
-            _context.UserResults.Update(finalResult);
+            // Not needed as it was tracked as added in this context
+            //_context.UserResults.Update(finalResult);
 
             await _context.SaveChangesAsync();
         }
