@@ -216,7 +216,7 @@ namespace light_quiz_api.Controllers
             return Ok(response);
         }
         [HttpGet("all")]
-        public async Task<ActionResult<IEnumerable<GetQuizMetadataResponse>>> GetQuizzesCreatedMetadata()
+        public async Task<ActionResult<IEnumerable<GetQuizMetadataResponse>>> GetQuizzesCreatedMetadata(int limit = 10)
         {
             var userId = GetCurrentUserId();
 
@@ -235,6 +235,7 @@ namespace light_quiz_api.Controllers
                     GroupId = q.GroupId ?? null,
                     Anonymous = q.Anonymous
                 })
+                .Take(limit)
                 .ToListAsync();
 
             if (response is null)
