@@ -576,7 +576,9 @@ namespace light_quiz_api.Controllers
                     OptionId = x.Id,
                     OptionText = x.OptionText,
                     OptionLetter = x.OptionLetter
-                }).ToList();
+                })
+                .OrderBy(x => x.OptionLetter)
+                .ToList();
 
                 char? correctOption = question.QuestionOptions.FirstOrDefault(x => x.IsCorrect)?.OptionLetter ?? null;
 
