@@ -222,6 +222,7 @@ namespace light_quiz_api.Controllers
 
             var response = await _context.Quizzes
                 .Where(q => q.CreatedBy == userId)
+                .OrderByDescending(q => q.StartsAt)
                 .Select(q => new GetQuizMetadataResponse
                 {
                     QuizId = q.Id,
