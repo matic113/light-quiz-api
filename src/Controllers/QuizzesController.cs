@@ -2,9 +2,12 @@
 using light_quiz_api.Dtos.Question;
 using light_quiz_api.Dtos.Quiz;
 using light_quiz_api.Dtos.QuizProgress;
+using light_quiz_api.Dtos.Student;
 using light_quiz_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 
@@ -435,7 +438,7 @@ namespace light_quiz_api.Controllers
             return Ok(response);
         }
         [HttpGet("review/{shortCode}")]
-        public async Task<IActionResult> GetStudentReviewByQuizShortCode(string shortCode)
+        public async Task<IActionResult> GetStudentReviewByQuizShortCode(string shortCode, int limit = 10)
         {
             var studentId = GetCurrentUserId();
             var quizAttempt = await _context.QuizAttempts
@@ -509,7 +512,35 @@ namespace light_quiz_api.Controllers
 
             return Ok(response);
         }
+        [HttpGet("responses/{quizShortCode}")]
+        public async Task<ActionResult<IEnumerable<GetStudentQuizResponse>>> GetStudentResponses(string quizShortCode)
+        {
+            var results = await _context.UserResults
+                        .Include(ur => ur.User)
+                        .Where(ur => ur.QuizShortCode == quizShortCode)
+                        .OrderByDescending(ur => ur.CreatedAt)
+                        .Select(ur => new GetStudentQuizResponse
+                        {
+                            StudentId = ur.UserId,
+                            StudentName = ur.User.FullName,
+                            StudentEmail = ur.User.Email ?? string.Empty,
+                            QuizId = ur.QuizId,
+                            QuizShortCode = ur.QuizShortCode ?? string.Empty,
+                            Grade = ur.Grade,
+                            GradedAt = ur.CreatedAt,
+                            PossiblePoints = ur.PossiblePoints,
+                            CorrectQuestions = ur.CorrectQuestions ?? 0,
+                            TotalQuestions = ur.TotalQuestion ?? 0
+                        })
+                        .ToListAsync();
 
+            if (!results.Any())
+            {
+                return Ok(Enumerable.Empty<GetStudentQuizResponse>());
+            }
+
+            return Ok(results);
+        }
         [HttpPost]
         public async Task<IActionResult> CreateQuiz([FromBody] PostQuizRequest request)
         {
