@@ -541,6 +541,87 @@ namespace light_quiz_api.Controllers
 
             return Ok(results);
         }
+        [HttpGet("manual-grading")]
+        public async Task<ActionResult<GetQuizGradingResponse>> GradeStudentResultManually(string quizShortCode, Guid studentId)
+        {
+            var quizAttempt = await _context.QuizAttempts
+                .Include(x => x.Quiz)
+                .Include(x => x.Student)
+                .FirstOrDefaultAsync(x => x.Quiz.ShortCode == quizShortCode && x.StudentId == studentId);
+
+            if (quizAttempt is null)
+            {
+                _logger.LogWarning("Student with Id: {studentId} didn't take quiz with Id: {shortCode}.", studentId, quizShortCode);
+                return NotFound($"Student didn't take this quiz yet.");
+            }
+
+            if (quizAttempt.State != AttemptState.Graded)
+            {
+                return BadRequest($"Student with Id: {studentId} is still taking this quiz or their results is not ready.");
+            }
+
+            var answers = await _context.StudentAnswers
+                .Where(x => x.QuizId == quizAttempt.QuizId && x.UserId == studentId)
+                .Include(x => x.Question)
+                    .ThenInclude(q => q.QuestionOptions)
+                .ToListAsync();
+
+            var gradingQuestions = new List<GetQuestionGradingResponse>();
+
+            foreach (var answer in answers)
+            {
+                var question = answer.Question;
+                var questionOptions = question.QuestionOptions.Select(x => new GetQuestionOptionsResponse
+                {
+                    OptionId = x.Id,
+                    OptionText = x.OptionText,
+                    OptionLetter = x.OptionLetter
+                }).ToList();
+
+                char? correctOption = question.QuestionOptions.FirstOrDefault(x => x.IsCorrect)?.OptionLetter ?? null;
+
+                var answerToAdd = new GetQuestionGradingResponse
+                {
+                    QuestionText = question.QuestionText,
+                    ImageUrl = question.ImageUrl,
+                    Options = questionOptions,
+                    StudentAnsweredText = answer.AnswerText ?? "",
+                    StudentAnsweredOption = answer.AnswerOptionLetter ?? null,
+                    CorrectOption = correctOption,
+                    Points = answer.Question.Points,
+                    IsCorrect = answer.GradingRating > 5,
+                    AiMessage = answer.GradingFeedback,
+                    AiConfidence = answer.GradingConfidence ?? 0,
+                    AiRating = answer.GradingRating ?? 0,
+                };
+
+                gradingQuestions.Add(answerToAdd);
+            }
+
+            var result = await _context.UserResults
+                            .Where(x => x.UserId == studentId && x.QuizShortCode == quizShortCode)
+                            .FirstOrDefaultAsync();
+
+            var response = new GetQuizGradingResponse
+            {
+                QuizId = quizAttempt.QuizId,
+                ShortCode = quizShortCode,
+                Title = quizAttempt.Quiz.Title,
+                Description = quizAttempt.Quiz.Description ?? string.Empty,
+                StudentId = studentId,
+                StudentName = quizAttempt.Student.FullName,
+                StudentEmail = quizAttempt.Student.Email ?? string.Empty,
+                Grade = result.Grade,
+                PossiblePoints = result.PossiblePoints,
+                CorrectQuestions = result.CorrectQuestions ?? 0,
+                TotalQuestions = result.TotalQuestion ?? 0,
+                SubmissionDate = quizAttempt.SubmissionDate,
+                GradingDate = result.CreatedAt,
+                Questions = gradingQuestions
+            };
+
+            return Ok(response);
+        }
         [HttpPost]
         public async Task<IActionResult> CreateQuiz([FromBody] PostQuizRequest request)
         {
