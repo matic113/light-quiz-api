@@ -624,6 +624,49 @@ namespace light_quiz_api.Controllers
 
             return Ok(response);
         }
+        [HttpPost("update-grades")]
+        public async Task<IActionResult> UpdateStudentGrades([FromBody] UpdateStudentGradesRequest request)
+        {
+            var oldResult = await _context.UserResults
+                .Where(x => x.UserId == request.StudentId && x.QuizId == request.QuizId)
+                .FirstOrDefaultAsync();
+
+            if (oldResult is null)
+            {
+                return NotFound($"Student with Id {request.StudentId} haven't takes this quiz yet.");
+            }
+
+            var oldAnswers = await _context.StudentAnswers
+                .Where(x => x.QuizId == request.QuizId && x.UserId == request.StudentId)
+                .Include(x => x.Question)
+                .ToListAsync();
+
+            // Looping over the question to check if each of them was in the mentioned quiz
+            foreach (var question in request.Questions)
+            {
+                var oldQuestion = oldAnswers.FirstOrDefault(x => x.QuestionId == question.QuestionId);
+                if (oldQuestion is null)
+                {
+                    return NotFound($"Question with Id {question.QuestionId} doesn't exist.");
+                }
+            }
+
+            int correctQuestions = request.Questions.Where(x => x.IsCorrect).Count();
+
+            //int newTotal = request.Questions.Sum(x => x.NewGrade);
+            int newTotal = (correctQuestions / (oldResult.TotalQuestion) ?? 1) * oldResult.PossiblePoints;
+
+            if (newTotal > oldResult.PossiblePoints)
+            {
+                return BadRequest($"New total points {newTotal} is greater than possible points {oldResult.PossiblePoints}");
+            }
+
+            oldResult.CorrectQuestions = correctQuestions;
+            oldResult.Grade = newTotal;
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
         [HttpPost]
         public async Task<IActionResult> CreateQuiz([FromBody] PostQuizRequest request)
         {
