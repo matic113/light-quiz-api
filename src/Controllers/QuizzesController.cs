@@ -650,6 +650,9 @@ namespace light_quiz_api.Controllers
                 {
                     return NotFound($"Question with Id {question.QuestionId} doesn't exist.");
                 }
+
+                // Update the question with the new grading
+                oldQuestion.GradingRating = question.IsCorrect ? 10 : 0;
             }
 
             int correctQuestions = request.Questions.Where(x => x.IsCorrect).Count();
