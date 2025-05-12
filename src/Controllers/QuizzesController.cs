@@ -584,6 +584,7 @@ namespace light_quiz_api.Controllers
 
                 var answerToAdd = new GetQuestionGradingResponse
                 {
+                    QuestionId = question.Id,
                     QuestionText = question.QuestionText,
                     ImageUrl = question.ImageUrl,
                     Options = questionOptions,
