@@ -309,7 +309,7 @@ namespace light_quiz_api.Controllers
             // Schedule the auto quiz submit
             _backgroundJobClient.Schedule<StudentSubmissionService>(
                 service => service.AutoSubmitQuizAsync(quizAttempt.Id),
-                TimeSpan.FromMinutes(quiz.DurationMinutes)
+                TimeSpan.FromMinutes(quiz.DurationMinutes + allowedMinutesDifference)
                 );
 
             _logger.LogInformation($"Quiz attempt created for quiz {quizId} with attempt ID {quizAttempt.Id}");
@@ -417,6 +417,7 @@ namespace light_quiz_api.Controllers
                 Title = quiz.Title,
                 Description = quiz.Description ?? string.Empty,
                 StartsAtUTC = quiz.StartsAt,
+                EndsAtUTC = pastAttempt.AttemptEndTimeUTC,
                 DurationMinutes = quiz.DurationMinutes,
                 Questions = questions
             };
