@@ -273,10 +273,12 @@ namespace light_quiz_api.Controllers
                 return NotFound();
             }
            
-            var studentStartTime = DateTime.UtcNow;
-            var quizEndTime = studentStartTime.AddMinutes(quiz.DurationMinutes);
-
             var allowedMinutesDifference = 1;
+
+            var studentStartTime = DateTime.UtcNow;
+            var globalQuizEndTime = quiz.StartsAt.AddMinutes(quiz.DurationMinutes + 1);
+
+            var studentEndTime = studentStartTime.AddMinutes(quiz.DurationMinutes);
 
             if (studentStartTime > quiz.StartsAt.AddMinutes(quiz.DurationMinutes))
             {
@@ -286,10 +288,9 @@ namespace light_quiz_api.Controllers
             // Student started the quiz after the allowed time difference
             if (!(studentStartTime < quiz.StartsAt.AddMinutes(allowedMinutesDifference)))
             {
-                var timeDifferenceSeconds = (studentStartTime - quiz.StartsAt).Seconds + allowedMinutesDifference * 60;
-
                 // Adjust the quiz end time to account for the time difference
-                quizEndTime = quizEndTime.AddSeconds(-timeDifferenceSeconds);
+                var studentDuration = globalQuizEndTime - studentStartTime;
+                studentEndTime = studentStartTime + studentDuration;
             }
 
             var quizAttempt = new QuizAttempt
@@ -298,7 +299,7 @@ namespace light_quiz_api.Controllers
                 QuizId = quiz.Id,
                 StudentId = studentId,
                 AttemptStartTimeUTC = studentStartTime,
-                AttemptEndTimeUTC = quizEndTime,
+                AttemptEndTimeUTC = studentEndTime,
                 LastSaved = DateTime.UtcNow,
                 State = AttemptState.InProgress
             };
@@ -348,7 +349,7 @@ namespace light_quiz_api.Controllers
                 Title = quiz.Title,
                 Description = quiz.Description ?? string.Empty,
                 StartsAtUTC = quiz.StartsAt,
-                EndsAtUTC = quizEndTime,
+                EndsAtUTC = studentEndTime,
                 DurationMinutes = quiz.DurationMinutes,
                 Questions = questions
             };
