@@ -98,7 +98,7 @@ namespace light_quiz_api.Services
                         }
                     ]
                 }
-                when you give your feedback i want you to format as if you were speaking to the student
+                when you give your feedback i want you to format as if you were speaking to the student also make sure your feedback is in the same language as the user answer (for arabic choose the egyptian dialect)
                 INPUT:
                 """;
 
