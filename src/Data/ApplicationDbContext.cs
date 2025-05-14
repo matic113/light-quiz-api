@@ -89,10 +89,10 @@ namespace light_quiz_api.Data
 
             // Properties
             builder.Property(q => q.QuizId).IsRequired();
-            builder.Property(q => q.QuestionText).IsRequired().HasMaxLength(255);
+            builder.Property(q => q.QuestionText).IsRequired();
             builder.Property(q => q.QuestionTypeId).IsRequired();
             builder.Property(q => q.Points).IsRequired();
-            builder.Property(q => q.CorrectAnswer).IsRequired().HasMaxLength(255);
+            builder.Property(q => q.CorrectAnswer).IsRequired();
 
             // Relationships
             builder.HasOne(q => q.Quiz)
@@ -116,7 +116,7 @@ namespace light_quiz_api.Data
 
             // Properties
             builder.Property(qo => qo.QuestionId).IsRequired();
-            builder.Property(qo => qo.OptionText).IsRequired().HasMaxLength(255);
+            builder.Property(qo => qo.OptionText).IsRequired();
             builder.Property(qo => qo.IsCorrect).IsRequired();
             builder.Property(qo => qo.OptionLetter).IsRequired();
 
