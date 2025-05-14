@@ -273,15 +273,31 @@ namespace light_quiz_api.Controllers
                 return NotFound();
             }
            
-            var quizStartTime = DateTime.UtcNow;
-            var quizEndTime = DateTime.UtcNow.AddMinutes(quiz.DurationMinutes);
+            var studentStartTime = DateTime.UtcNow;
+            var quizEndTime = studentStartTime.AddMinutes(quiz.DurationMinutes);
+
+            var allowedMinutesDifference = 1;
+
+            if (studentStartTime > quiz.StartsAt.AddMinutes(quiz.DurationMinutes))
+            {
+                return BadRequest($"Quiz with Id: {quizId} has already ended.");
+            }
+
+            // Student started the quiz after the allowed time difference
+            if (!(studentStartTime < quiz.StartsAt.AddMinutes(allowedMinutesDifference)))
+            {
+                var timeDifferenceSeconds = (studentStartTime - quiz.StartsAt).Seconds + allowedMinutesDifference * 60;
+
+                // Adjust the quiz end time to account for the time difference
+                quizEndTime = quizEndTime.AddSeconds(-timeDifferenceSeconds);
+            }
 
             var quizAttempt = new QuizAttempt
             {
                 Id = Guid.NewGuid(),
                 QuizId = quiz.Id,
                 StudentId = studentId,
-                AttemptStartTimeUTC = quizStartTime,
+                AttemptStartTimeUTC = studentStartTime,
                 AttemptEndTimeUTC = quizEndTime,
                 LastSaved = DateTime.UtcNow,
                 State = AttemptState.InProgress
