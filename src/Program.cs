@@ -12,7 +12,7 @@ builder.AddServices();
 
 var app = builder.Build();
 
-await app.Configure();
+await app.Configure(builder.Configuration);
 
 //Add support to logging request with SERILOG
 app.UseSerilogRequestLogging();

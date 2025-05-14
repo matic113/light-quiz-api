@@ -1,12 +1,13 @@
 ﻿
 using Hangfire;
+using Hangfire.Dashboard.BasicAuthorization;
 using Microsoft.Extensions.Options;
 
 namespace light_quiz_api
 {
     public static class ConfigureApp
     {
-        public static async Task Configure(this WebApplication app)
+        public static async Task Configure(this WebApplication app, IConfiguration configuration)
         {
             app.UseSwagger();
             app.UseSwaggerUI(options =>
@@ -25,7 +26,27 @@ namespace light_quiz_api
             app.UseAuthorization();
             app.MapControllers();
 
-            app.UseHangfireDashboard();
+            string hangfirePassword = configuration["Hangfire:DashboardPassword"] ?? "admin";
+
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
+                {
+                    RequireSsl = true,
+                    SslRedirect = false,
+                    LoginCaseSensitive = true,
+                    Users = new []
+                    {
+                        new BasicAuthAuthorizationUser
+                        {
+                            Login = "admin",
+                            PasswordClear =  hangfirePassword,
+                        }
+                    }
+
+                })}
+            });
+
 
             await app.EnsureDatabaseCreated();
         }
