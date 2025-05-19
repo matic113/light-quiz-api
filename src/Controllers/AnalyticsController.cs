@@ -38,6 +38,7 @@ namespace light_quiz_api.Controllers
                 StudentId = ur.User.Id,
                 FullName = ur.User.FullName,
                 Score = ur.Grade,
+                AvatarUrl = ur.User.AvatarUrl ?? string.Empty,
             }).ToList();
 
             var attemps = quiz.QuizAttempts;
@@ -86,6 +87,7 @@ namespace light_quiz_api.Controllers
                 StudentId = ur.User.Id,
                 FullName = ur.User.FullName,
                 Score = ur.Grade,
+                AvatarUrl = ur.User.AvatarUrl ?? string.Empty,
             }).ToList();
 
             var attemps = quiz.QuizAttempts;
