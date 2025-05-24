@@ -22,7 +22,7 @@ namespace light_quiz_api.Services
                 .Where(x => x.QuizShortCode == quizShortCode)
                 .Select( ur => new ReportRow
                 {
-                    Email = ur.User.Email,
+                    Email = ur.User.Email!,
                     FullName = ur.User.FullName,
                     Score = ur.Grade,
                     CorrectAnswers = ur.CorrectQuestions ?? 0

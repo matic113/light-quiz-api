@@ -266,7 +266,7 @@ namespace light_quiz_api.Data
                 .HasForeignKey(sa => sa.QuestionId);
 
             // Check constraint
-            builder.HasCheckConstraint("chk_student_answers_answer_not_null", "answer_option IS NOT NULL OR answer_text IS NOT NULL");
+            builder.ToTable(t => t.HasCheckConstraint("chk_student_answers_answer_not_null", "answer_option IS NOT NULL OR answer_text IS NOT NULL"));
         }
 
         private void ConfigureGroupsTable(ModelBuilder modelBuilder)

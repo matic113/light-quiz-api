@@ -1,10 +1,12 @@
-﻿
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using FirebaseAdmin;
 using gemini_test.Services;
 using Google.Apis.Auth.OAuth2;
 using Hangfire;
 using Hangfire.PostgreSql;
+using light_quiz_api.Services.Email;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Resend;
 using System.Threading.RateLimiting;
 
 namespace light_quiz_api
@@ -13,10 +15,11 @@ namespace light_quiz_api
     {
         public static void AddServices(this WebApplicationBuilder builder)
         {
-            builder.Services.AddControllers();
+            builder.Services.AddControllersWithViews();
 
             builder.AddSwagger();
             builder.AddDatabase();
+            builder.AddResend();
 
             builder.AddHangfireServices();
 
@@ -42,7 +45,6 @@ namespace light_quiz_api
 
             builder.AddJwtAuthentication();
         }
-
         private static void AddSwagger(this WebApplicationBuilder builder)
         {
             builder.Services.AddEndpointsApiExplorer();
@@ -90,7 +92,6 @@ namespace light_quiz_api
                 //options.DocumentFilter<HideSchemasFilter>();
             });
         }
-
         private static void AddDatabase(this WebApplicationBuilder builder)
         {
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -106,7 +107,24 @@ namespace light_quiz_api
                 options.UseSnakeCaseNamingConvention();
             });
         }
+        private static void AddResend(this WebApplicationBuilder builder)
+        {
+            builder.Services.Configure<RazorViewEngineOptions>(options =>
+            {
+                options.ViewLocationFormats.Add("/Services/Email/Templates/{0}" + RazorViewEngine.ViewExtension);
+            });
 
+            builder.Services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+
+            builder.Services.AddOptions();
+            builder.Services.AddHttpClient<ResendClient>();
+            builder.Services.Configure<ResendClientOptions>(o =>
+            {
+                o.ApiToken = builder.Configuration["Resend:ApiToken"]!;
+            });
+            builder.Services.AddTransient<IResend, ResendClient>();
+            builder.Services.AddTransient<ResendService>();
+        }
         private static void AddHangfireServices(this WebApplicationBuilder builder)
         {
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -126,7 +144,6 @@ namespace light_quiz_api
             builder.Services.AddHangfireServer();
 
         }
-
         private static void AddGeminiServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddSingleton<RateLimiter>(sp =>
@@ -146,7 +163,6 @@ namespace light_quiz_api
 
             builder.Services.AddScoped<IGeminiService, GeminiService>();
         }
-
         private static void AddJwtAuthentication(this WebApplicationBuilder builder)
         {
             // JWT

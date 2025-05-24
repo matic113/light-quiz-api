@@ -1,0 +1,178 @@
+﻿@model light_quiz_api.Services.Email.Models.WelcomeEmailViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to @Model.AppName!</title>
+    <style>
+        /* Reset and Base Styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f7f6; /* Light background for the email client window */
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        /* Email Container */
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto; /* Centering and top/bottom margin */
+            padding: 30px;
+            background-color: #ffffff; /* White background for the content card */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Header Styles */
+        .header {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eeeeee;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            max-width: 120px; /* Adjust as needed */
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .app-name {
+            font-size: 26px;
+            font-weight: 600;
+            color: #2c3e50; /* A modern, slightly desaturated blue */
+            margin-top: 0; /* Reset margin if logo is present */
+        }
+
+        .welcome-message {
+            font-size: 22px;
+            font-weight: 500;
+            color: #34495e; /* Darker shade for emphasis */
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        /* Content Styles */
+        .content {
+            font-size: 16px;
+            color: #555555;
+        }
+
+        .content p {
+            margin-bottom: 18px;
+        }
+
+        .content a {
+            color: #3498db; /* A pleasant blue for links */
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Button Styles (Example if you add one later) */
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            margin-top: 20px;
+            background-color: #3498db;
+            color: #ffffff !important; /* Important to override link color if it's an <a> tag */
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+            text-decoration: none;
+        }
+
+
+        /* Footer Styles */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            font-size: 13px;
+            color: #888888;
+        }
+
+        .footer p {
+            margin-bottom: 5px;
+        }
+
+        .footer a {
+            color: #888888;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .header {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-message {
+            font-size: 20px;
+        }
+
+        .app-name {
+            font-size: 24px;
+        }
+
+        .content {
+            font-size: 15px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 15px;
+        }
+
+        .footer {
+            font-size: 12px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://r2.theknight.tech/logo-small.png" alt="@Model.AppName Logo" class="logo" />
+            <h1 class="app-name">@Model.AppName</h1>
+            <p class="welcome-message">Welcome aboard, @Model.UserName!</p>
+        </div>
+        <div class="content">
+            <p>Thank you for registering with <strong>@Model.AppName</strong>. We're thrilled to have you join our community!</p>
+            <p>You're all set to explore and start taking quizzes. Dive in and test your knowledge!</p>
+            <p>If you have any questions or need a hand getting started, please don't hesitate to reach out to our support team. We're here to help.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; @DateTime.UtcNow.Year @Model.AppName. All rights reserved.</p>
+            <p>
+                <a href="[YourWebsiteLink]">Visit our website</a> | <a href="[YourPrivacyPolicyLink]">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
