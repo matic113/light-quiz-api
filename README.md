@@ -73,6 +73,20 @@ Configure the following environment variables in your `appsettings.json` or as s
 }
 ```
 
+### Firebase Service Key Setup
+
+**Option 1: Service Key File (Recommended for development)**
+1. Download your Firebase service account key from the Firebase Console
+2. Save it as `serviceKey.json` in the `src/` directory
+3. Ensure the file is included in your `.gitignore` for security
+
+**Option 2: Environment Variable (Recommended for production)**
+```bash
+export SERVICE_KEY_JSON='{"type":"service_account","project_id":"your-project",...}'
+```
+
+> **Note**: When using Docker, the SERVICE_KEY_JSON environment variable is automatically written to `/app/serviceKey.json` during container startup.
+
 ## 🔗 Related Projects
 
 - [Light Quiz Frontend](https://github.com/matic113/light-quiz) - Angular-based web application
