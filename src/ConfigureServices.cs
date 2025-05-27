@@ -5,6 +5,7 @@ using gemini_test.Services;
 using Google.Apis.Auth.OAuth2;
 using Hangfire;
 using Hangfire.PostgreSql;
+using System.Reflection;
 using System.Threading.RateLimiting;
 
 namespace light_quiz_api
@@ -86,6 +87,10 @@ namespace light_quiz_api
                         Array.Empty<string>()
                     }
                 });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
 
                 //options.DocumentFilter<HideSchemasFilter>();
             });

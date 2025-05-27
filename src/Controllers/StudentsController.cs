@@ -24,8 +24,16 @@ namespace light_quiz_api.Controllers
             _context = context;
             _backgroundJobClient = backgroundJobClient;
             _gradingService = gradingService;
-        }
-
+        }        /// <summary>
+        /// Saves student progress for a quiz attempt.
+        /// </summary>
+        /// <remarks>
+        /// Allows students to save their current progress on a quiz, including answers
+        /// to questions. This enables students to resume their quiz later.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("progress/{quizId:guid}")]
         public async Task<ActionResult> SaveStudentProgress(Guid quizId, [FromBody] PostQuizProgressRequest request)
         {
@@ -77,8 +85,16 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }
-
+        }        /// <summary>
+        /// Retrieves the current progress of a student's quiz attempt.
+        /// </summary>
+        /// <remarks>
+        /// Returns the student's saved progress for a specific quiz, including
+        /// previously answered questions and timing information.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizProgressResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("progress/{quizId:guid}")]
         public async Task<ActionResult<GetQuizProgressResponse>> GetStudentProgress(Guid quizId)
         {
@@ -116,8 +132,17 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }
-
+        }        /// <summary>
+        /// Submits a completed quiz for grading.
+        /// </summary>
+        /// <remarks>
+        /// Finalizes a student's quiz attempt by submitting all answers for grading.
+        /// Once submitted, the quiz cannot be modified and will be processed for scoring.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost("submit/{quizId:guid}")]
         public async Task<ActionResult> SubmitQuiz(Guid quizId, [FromBody] SubmitQuizRequest request)
         {
@@ -202,8 +227,17 @@ namespace light_quiz_api.Controllers
             _backgroundJobClient.Enqueue(() => _gradingService.GradeQuizAsync(studentId, quizId));
 
             return Ok();
-        }
-
+        }        /// <summary>
+        /// Retrieves the result of a student's quiz attempt by quiz ID.
+        /// </summary>
+        /// <remarks>
+        /// Returns the graded result of a student's quiz attempt, including
+        /// the score, possible points, and quiz metadata.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetStudentResultResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("result/{quizId:guid}")]
         public async Task<ActionResult<GetStudentResultResponse>> GetQuizResult(Guid quizId)
         {
@@ -235,7 +269,17 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(result);
-        }
+        }        /// <summary>
+        /// Retrieves the result of a student's quiz attempt by quiz short code.
+        /// </summary>
+        /// <remarks>
+        /// Returns the graded result of a student's quiz attempt using the quiz's short code,
+        /// including the score, possible points, and quiz metadata.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetStudentResultResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("result/{shortCode}")]
         public async Task<ActionResult<GetStudentResultResponse>> GetQuizResultByQuizShortCode(string shortCode)
         {
@@ -267,8 +311,15 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(result);
-        }
-
+        }        /// <summary>
+        /// Retrieves all quiz results for the authenticated student.
+        /// </summary>
+        /// <remarks>
+        /// Returns a list of all quiz results for the current student, with an optional
+        /// limit parameter to control the number of results returned.
+        /// </remarks>
+        [ProducesResponseType(typeof(IEnumerable<GetStudentResultResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("results")]
         public async Task<ActionResult<IEnumerable<GetStudentResultResponse>>> GetStudentResults([FromQuery] int limit = 10)
         {

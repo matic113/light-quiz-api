@@ -30,8 +30,16 @@ namespace light_quiz_api.Controllers
             _backgroundJobClient = backgroundJobClient;
             _shortCodeGenerator = shortCodeGenerator;
             _reportService = reportService;
-        }
-
+        }        /// <summary>
+        /// Retrieves quiz metadata by quiz ID.
+        /// </summary>
+        /// <remarks>
+        /// Returns basic quiz information including title, description, timing,
+        /// and configuration details for a specific quiz identified by its GUID.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizMetadataResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("metadata/{quizId:guid}")]
         public async Task<ActionResult<GetQuizMetadataResponse>> GetQuizMetadata(Guid quizId)
         {
@@ -97,8 +105,16 @@ namespace light_quiz_api.Controllers
 
 
             return Ok(response);
-        }
-
+        }        /// <summary>
+        /// Retrieves quiz metadata by quiz short code.
+        /// </summary>
+        /// <remarks>
+        /// Returns basic quiz information including title, description, timing,
+        /// and configuration details for a specific quiz identified by its short code.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizMetadataResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("metadata/{shortCode}")]
         public async Task<ActionResult<GetQuizMetadataResponse>> GetQuizMetadataByShortCode(string shortCode)
         {
@@ -163,7 +179,16 @@ namespace light_quiz_api.Controllers
             response.DidStartQuiz = pastAttempt?.State == AttemptState.InProgress;
 
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Retrieves quiz metadata for quizzes within a specific group.
+        /// </summary>
+        /// <remarks>
+        /// Returns quiz metadata for all quizzes belonging to a group identified by its short code.
+        /// Useful for displaying group-specific quiz information.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizMetadataResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("metadata/group/{shortCode}")]
         public async Task<ActionResult<GetQuizMetadataResponse>> GetQuizMetadataByGroupShortCode(string shortCode)
         {
@@ -217,7 +242,15 @@ namespace light_quiz_api.Controllers
                 return NotFound($"No quizzes found for group with shortcode: {shortCode}");
             }
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Retrieves all quizzes created by the authenticated user.
+        /// </summary>
+        /// <remarks>
+        /// Returns metadata for all quizzes created by the current user,
+        /// ordered by start date with an optional limit parameter.
+        /// </remarks>
+        [ProducesResponseType(typeof(IEnumerable<GetQuizMetadataResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<GetQuizMetadataResponse>>> GetQuizzesCreatedMetadata(int limit = 10)
         {
@@ -247,10 +280,18 @@ namespace light_quiz_api.Controllers
                 return NotFound($"No quizzes found for user with Id: {userId}");
             }
             return Ok(response);
-        }
-
+        }        /// <summary>
+        /// Starts a new quiz attempt and retrieves quiz questions.
+        /// </summary>
+        /// <remarks>
+        /// Initiates a new quiz attempt for the student and returns the quiz questions.
+        /// Creates a new attempt record and validates quiz availability and timing.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost("start/{quizId:guid}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetQuizResponse))]
         public async Task<ActionResult<Quiz>> StartAndGetQuiz(Guid quizId)
         {
             var studentId = GetCurrentUserId();
@@ -357,8 +398,17 @@ namespace light_quiz_api.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Resumes a previously started quiz attempt.
+        /// </summary>
+        /// <remarks>
+        /// Allows a student to resume a quiz that was previously started but not completed.
+        /// Returns the quiz questions and restores the previous attempt state.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost("resume/{quizId:guid}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetQuizResponse))]
         public async Task<ActionResult<Quiz>> ResumeQuiz(Guid quizId)
         {
             var studentId = GetCurrentUserId();
@@ -454,7 +504,16 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Retrieves a student's quiz review by quiz short code.
+        /// </summary>
+        /// <remarks>
+        /// Returns detailed review information for a student's completed quiz attempt,
+        /// including answers, correct responses, and grading details.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizReviewResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("review/{shortCode}")]
         public async Task<IActionResult> GetStudentReviewByQuizShortCode(string shortCode, int limit = 10)
         {
@@ -529,7 +588,16 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Retrieves all student responses for a specific quiz by short code.
+        /// </summary>
+        /// <remarks>
+        /// Returns a list of all student submissions and their responses for a quiz,
+        /// useful for teachers to review student performance and answers.
+        /// </remarks>
+        [ProducesResponseType(typeof(IEnumerable<GetStudentQuizResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("responses/{quizShortCode}")]
         public async Task<ActionResult<IEnumerable<GetStudentQuizResponse>>> GetStudentResponses(string quizShortCode)
         {
@@ -558,7 +626,16 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(results);
-        }
+        }        /// <summary>
+        /// Retrieves quiz data for manual grading of a student's submission.
+        /// </summary>
+        /// <remarks>
+        /// Returns detailed quiz and student answer information for manual grading purposes,
+        /// allowing teachers to review and score individual student responses.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizGradingResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("manual-grading")]
         public async Task<ActionResult<GetQuizGradingResponse>> GradeStudentResultManually(string quizShortCode, Guid studentId)
         {
@@ -642,7 +719,17 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Updates student grades after manual grading.
+        /// </summary>
+        /// <remarks>
+        /// Allows teachers to update student grades and question scores after manual review.
+        /// Updates both individual question grades and overall quiz scores.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost("update-grades")]
         public async Task<IActionResult> UpdateStudentGrades([FromBody] UpdateStudentGradesRequest request)
         {
@@ -688,7 +775,16 @@ namespace light_quiz_api.Controllers
 
             await _context.SaveChangesAsync();
             return Ok();
-        }
+        }        /// <summary>
+        /// Creates a new quiz with questions and options.
+        /// </summary>
+        /// <remarks>
+        /// Creates a new quiz including all questions, options, and configuration settings.
+        /// Automatically generates a unique short code for the quiz.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost]
         public async Task<IActionResult> CreateQuiz([FromBody] PostQuizRequest request)
         {
@@ -789,7 +885,16 @@ namespace light_quiz_api.Controllers
             }
 
             return CreatedAtAction(nameof(GetQuizMetadataByShortCode), new { shortCode }, null);
-        }
+        }        /// <summary>
+        /// Deletes a quiz by its unique identifier.
+        /// </summary>
+        /// <remarks>
+        /// Permanently removes a quiz and all associated data from the system.
+        /// Only the quiz creator can delete a quiz.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{quizId:guid}")]
         public async Task<IActionResult> DeleteQuiz(Guid quizId)
         {
@@ -801,7 +906,16 @@ namespace light_quiz_api.Controllers
             _context.Quizzes.Remove(quiz);
             await _context.SaveChangesAsync();
             return Ok();
-        }
+        }        /// <summary>
+        /// Deletes a quiz by its short code.
+        /// </summary>
+        /// <remarks>
+        /// Permanently removes a quiz and all associated data from the system using its short code.
+        /// Only the quiz creator can delete a quiz.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{shortCode}")]
         public async Task<IActionResult> DeleteQuiz(string shortCode)
         {
@@ -813,7 +927,17 @@ namespace light_quiz_api.Controllers
             _context.Quizzes.Remove(quiz);
             await _context.SaveChangesAsync();
             return Ok();
-        }
+        }        /// <summary>
+        /// Generates a comprehensive report for a quiz.
+        /// </summary>
+        /// <remarks>
+        /// Creates a detailed PDF report containing quiz analytics, student performance,
+        /// and statistical analysis for a quiz identified by its short code.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost("report/{shortCode}")]
         public async Task<IActionResult> GenerateReportForQuiz(string shortCode)
         {

@@ -16,12 +16,17 @@ namespace light_quiz_api.Controllers
             _logger = logger;
         }
 
-        public record PromptRequest(string Prompt);
-
-        [HttpPost("prompt")]
+        public record PromptRequest(string Prompt);        /// <summary>
+        /// Generates AI content using Google's Gemini API.
+        /// </summary>
+        /// <remarks>
+        /// Sends a prompt to Google's Gemini AI service and returns the generated response.
+        /// This endpoint is rate-limited and requires a valid prompt in the request body.
+        /// </remarks>
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost("prompt")]
         public async Task<IActionResult> GenerateContent([FromBody] PromptRequest request, CancellationToken cancellationToken)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Prompt))

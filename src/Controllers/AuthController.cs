@@ -18,8 +18,15 @@ namespace light_quiz_api.Controllers
             _authService = authService;
             _userManager = userManager;
             _userAvatarService = userAvatarService;
-        }
-
+        }        /// <summary>
+        /// Registers a new user account in the system.
+        /// </summary>
+        /// <remarks>
+        /// Creates a new user account with the provided information and returns authentication token.
+        /// The password must meet complexity requirements.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterRequest request)
         {
@@ -31,8 +38,16 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(new { token = registerResult.Token, expireOn = registerResult.ExpiresOn });
-        }
-
+        }        /// <summary>
+        /// Authenticates a user and returns a JWT token.
+        /// </summary>
+        /// <remarks>
+        /// Validates user credentials and returns a JWT token for authentication.
+        /// The token should be included in the Authorization header for subsequent requests.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost("token")]
         public async Task<IActionResult> GetTokenAsync([FromBody] TokenRequestModel model)
         {
@@ -44,8 +59,15 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(new { token = loginResult.Token, expireOn = loginResult.ExpiresOn });
-        }
-
+        }        /// <summary>
+        /// Updates the device token for push notifications.
+        /// </summary>
+        /// <remarks>
+        /// Updates the user's device token used for sending push notifications.
+        /// Requires authentication.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost("update-devicetoken/{deviceToken}")]
         [Authorize]
         public async Task<IActionResult> UpdateDeviceTokenAsync(string deviceToken)
@@ -68,8 +90,15 @@ namespace light_quiz_api.Controllers
             currentUser.DeviceToken = deviceToken;
             await _userManager.UpdateAsync(currentUser);
             return Ok("Device token updated successfully.");
-        }
-
+        }        /// <summary>
+        /// Validates the current user's authentication status.
+        /// </summary>
+        /// <remarks>
+        /// Checks if the current user is authenticated and returns confirmation.
+        /// Used for verifying token validity.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost("info")]
         [Authorize]
         public IActionResult GetInfo()
@@ -96,7 +125,15 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok("Authenticated");
-        }
+        }        /// <summary>
+        /// Retrieves the current authenticated user's profile information.
+        /// </summary>
+        /// <remarks>
+        /// Returns detailed information about the currently authenticated user including
+        /// personal details, avatar, and assigned roles. Generates avatar if not already set.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetUserInfo), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("me")]
         [Authorize]
         public async Task<ActionResult<GetUserInfo>> GetMe()

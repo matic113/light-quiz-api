@@ -19,6 +19,16 @@ namespace light_quiz_api.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Retrieves the top students for a specific quiz identified by its short code.
+        /// </summary>
+        /// <remarks>
+        /// This endpoint returns a list of the highest-scoring students for a given quiz.
+        /// The number of students returned can be limited using the 'limit' query parameter.
+        /// </remarks>
+        [ProducesResponseType(typeof(TopStudentsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpGet("quiz/{shortCode}/top-students")]
         public async Task<ActionResult<TopStudentsResponse>> GetTopStudentsForQuizByShortCode(string shortCode, [FromQuery] int limit = 3)
         {
@@ -53,7 +63,7 @@ namespace light_quiz_api.Controllers
                     currentStudent.SubmissionDate = attempt.SubmissionDate;
                 }
             }
-            
+
             var topStudents = studentsResponse
                 .OrderByDescending(s => s.Score)
                 .ThenBy(s => s.SecondsSpent)
@@ -67,7 +77,16 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Retrieves the lowest-scoring students for a specific quiz identified by its short code.
+        /// </summary>
+        /// <remarks>
+        /// This endpoint returns a list of the lowest-scoring students for a given quiz.
+        /// The number of students returned can be limited using the 'limit' query parameter.
+        /// </remarks>
+        [ProducesResponseType(typeof(TopStudentsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpGet("quiz/{shortCode}/bot-students")]
         public async Task<ActionResult<TopStudentsResponse>> GetBottomStudentsForQuizByShortCode(string shortCode, [FromQuery] int limit = 3)
         {
@@ -116,7 +135,16 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Retrieves comprehensive analytics data for a specific quiz.
+        /// </summary>
+        /// <remarks>
+        /// Returns detailed analytics including quiz metadata, student performance statistics,
+        /// time spent data, and participation metrics for a quiz identified by its short code.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetQuizAnalyticsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpGet("quiz/{shortCode}")]
         public async Task<ActionResult<GetQuizAnalyticsResponse>> GetQuizAnalytics(string shortCode)
         {
@@ -149,7 +177,7 @@ namespace light_quiz_api.Controllers
 
             var numberOfStudents = 0;
 
-            if(quiz.Group is not null)
+            if (quiz.Group is not null)
             {
                 numberOfStudents = quiz.Group.GroupMembers.Count();
             }
@@ -170,7 +198,16 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Retrieves the questions with the highest and lowest correct answer rates for a quiz.
+        /// </summary>
+        /// <remarks>
+        /// Returns analytics about which questions were answered correctly most and least frequently,
+        /// helping to identify the easiest and hardest questions in the quiz.
+        /// </remarks>
+        [ProducesResponseType(typeof(TopQuestionsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpGet("quiz/{shortCode}/top-questions")]
         public async Task<ActionResult<TopQuestionsResponse>> GetTopQuestionsAnswered(string shortCode, [FromQuery] int limit = 2)
         {
@@ -203,8 +240,16 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }
-
+        }        /// <summary>
+        /// Retrieves the top performing students across all quizzes in a group.
+        /// </summary>
+        /// <remarks>
+        /// Returns the highest-scoring students across all quizzes within a specific group,
+        /// ranked by total score and average time taken.
+        /// </remarks>
+        [ProducesResponseType(typeof(IEnumerable<TopPerformerResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpGet("group/{shortCode}/top-performers")]
         public async Task<ActionResult<IEnumerable<TopStudentsResponse>>> GetTopPerformersForGroup(string shortCode, [FromQuery] int limit = 3)
         {
@@ -239,7 +284,16 @@ namespace light_quiz_api.Controllers
                 .ToList();
 
             return Ok(studentPerformance);
-        }
+        }        /// <summary>
+        /// Retrieves the lowest performing students across all quizzes in a group.
+        /// </summary>
+        /// <remarks>
+        /// Returns the lowest-scoring students across all quizzes within a specific group,
+        /// ranked by total score and average time taken.
+        /// </remarks>
+        [ProducesResponseType(typeof(IEnumerable<TopPerformerResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpGet("group/{shortCode}/bot-performers")]
         public async Task<ActionResult<IEnumerable<TopStudentsResponse>>> GetBottomPerformersForGroup(string shortCode, [FromQuery] int limit = 3)
         {
@@ -274,8 +328,16 @@ namespace light_quiz_api.Controllers
                 .ToList();
 
             return Ok(studentPerformance);
-        }
-
+        }        /// <summary>
+        /// Retrieves comprehensive statistics for a teacher's groups and quizzes.
+        /// </summary>
+        /// <remarks>
+        /// Returns aggregate statistics including total groups, students, quizzes created,
+        /// total questions, and upcoming quizzes for the authenticated teacher.
+        /// </remarks>
+        [ProducesResponseType(typeof(TeacherStatsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("groups/stats")]
         public async Task<ActionResult<TeacherStatsResponse>> GetTeacherStatsForGroup()
         {

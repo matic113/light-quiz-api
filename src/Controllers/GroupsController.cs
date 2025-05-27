@@ -19,8 +19,16 @@ namespace light_quiz_api.Controllers
             _context = context;
             _codeGenerator = codeGenerator;
             _userManager = userManager;
-        }
-
+        }        /// <summary>
+        /// Creates a new group with specified members.
+        /// </summary>
+        /// <remarks>
+        /// Creates a new group and adds the specified members to it.
+        /// The authenticated user becomes the group creator and is automatically added as a member.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost]
         public async Task<IActionResult> CreateGroup(CreateGroupRequest request)
         {
@@ -69,8 +77,17 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetGroup), new { shortCode }, null);
-        }
-
+        }        /// <summary>
+        /// Adds new members to an existing group.
+        /// </summary>
+        /// <remarks>
+        /// Adds new members to a group by their email addresses.
+        /// Only the group creator can add new members.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("add")]
         public async Task<IActionResult> AddMembersToGroup(AddMembersToGroupRequest request)
         {
@@ -123,7 +140,17 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }
+        }        /// <summary>
+        /// Removes specified members from a group.
+        /// </summary>
+        /// <remarks>
+        /// Removes members from a group by their email addresses.
+        /// Only the group creator can remove members.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("remove")]
         public async Task<IActionResult> RemoveMembersFromGroup(RemoveMembersFromGroupRequest request)
         {
@@ -165,8 +192,17 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }
-
+        }        /// <summary>
+        /// Allows a user to join a group using its short code.
+        /// </summary>
+        /// <remarks>
+        /// Enables authenticated users to join a group by providing the group's short code.
+        /// Users cannot join groups they are already members of.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("join/{shortCode}")]
         public async Task<IActionResult> JoinGroup(string shortCode)
         {
@@ -198,7 +234,17 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }
+        }        /// <summary>
+        /// Allows a user to leave a group.
+        /// </summary>
+        /// <remarks>
+        /// Enables authenticated users to leave a group they are currently a member of.
+        /// Users cannot leave groups they are not members of.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("leave/{shortCode}")]
         public async Task<IActionResult> LeaveGroup(string shortCode)
         {
@@ -227,10 +273,16 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok();
-        }
-
+        }        /// <summary>
+        /// Retrieves all groups created by the authenticated user.
+        /// </summary>
+        /// <remarks>
+        /// Returns a list of all groups where the authenticated user is the creator,
+        /// including member information and teacher profile details.
+        /// </remarks>
+        [ProducesResponseType(typeof(IEnumerable<GetGroupResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("created")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<GetGroupResponse>))]
         public async Task<ActionResult<IEnumerable<GetGroupResponse>>> GetCreatedGroups()
         {
             var userId = GetCurrentUserId();
@@ -275,10 +327,16 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(response);
-        }
-
+        }        /// <summary>
+        /// Retrieves all groups where the authenticated user is a member.
+        /// </summary>
+        /// <remarks>
+        /// Returns a list of all groups where the authenticated user is a member,
+        /// including member information and teacher profile details.
+        /// </remarks>
+        [ProducesResponseType(typeof(IEnumerable<GetGroupResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("memberof")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<GetGroupResponse>))]
         public async Task<ActionResult<IEnumerable<GetGroupResponse>>> GetGroupsMemberships()
         {
             var userId = GetCurrentUserId();
@@ -323,10 +381,17 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(response);
-        }
-
+        }        /// <summary>
+        /// Retrieves detailed information about a specific group by its short code.
+        /// </summary>
+        /// <remarks>
+        /// Returns comprehensive group information including member details and teacher profile
+        /// for a group identified by its short code.
+        /// </remarks>
+        [ProducesResponseType(typeof(GetGroupResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("{shortCode}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetGroupResponse))]
         public async Task<ActionResult<GetGroupResponse>> GetGroup(string shortCode)
         {
             var group = await _context.Groups
@@ -367,7 +432,16 @@ namespace light_quiz_api.Controllers
                     }).ToList()
             };
             return Ok(response);
-        }
+        }        /// <summary>
+        /// Deletes a group by its unique identifier.
+        /// </summary>
+        /// <remarks>
+        /// Permanently removes a group from the system using its GUID.
+        /// Only authorized users can delete groups.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{groupId:guid}")]
         public async Task<IActionResult> DeleteGroup(Guid groupId)
         {
@@ -379,7 +453,16 @@ namespace light_quiz_api.Controllers
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
             return Ok();
-        }
+        }        /// <summary>
+        /// Deletes a group by its short code.
+        /// </summary>
+        /// <remarks>
+        /// Permanently removes a group from the system using its short code.
+        /// Only authorized users can delete groups.
+        /// </remarks>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{shortCode}")]
         public async Task<IActionResult> DeleteGroup(string shortCode)
         {
