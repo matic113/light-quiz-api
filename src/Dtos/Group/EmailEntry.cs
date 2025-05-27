@@ -7,6 +7,6 @@ namespace light_quiz_api.Dtos.Group
         [EmailAddress]
         public string Email { get; set; } = "";
 
-        public string NormalizedEmail () => Email.ToUpperInvariant();
+        public string NormalizedEmail() => Email.ToUpperInvariant();
     }
 }

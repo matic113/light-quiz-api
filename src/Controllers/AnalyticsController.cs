@@ -1,8 +1,6 @@
 ﻿using light_quiz_api.Dtos.Analytics;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace light_quiz_api.Controllers
 {
@@ -77,7 +75,8 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }        /// <summary>
+        }       
+        /// <summary>
         /// Retrieves the lowest-scoring students for a specific quiz identified by its short code.
         /// </summary>
         /// <remarks>
@@ -135,7 +134,8 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves comprehensive analytics data for a specific quiz.
         /// </summary>
         /// <remarks>
@@ -198,7 +198,8 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves the questions with the highest and lowest correct answer rates for a quiz.
         /// </summary>
         /// <remarks>
@@ -240,7 +241,8 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves the top performing students across all quizzes in a group.
         /// </summary>
         /// <remarks>
@@ -284,7 +286,8 @@ namespace light_quiz_api.Controllers
                 .ToList();
 
             return Ok(studentPerformance);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves the lowest performing students across all quizzes in a group.
         /// </summary>
         /// <remarks>
@@ -328,7 +331,8 @@ namespace light_quiz_api.Controllers
                 .ToList();
 
             return Ok(studentPerformance);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves comprehensive statistics for a teacher's groups and quizzes.
         /// </summary>
         /// <remarks>

@@ -1,6 +1,5 @@
 ﻿using MiniExcelLibs;
 using MiniExcelLibs.OpenXml;
-using light_quiz_api.Services;
 
 namespace light_quiz_api.Services
 {
@@ -20,7 +19,7 @@ namespace light_quiz_api.Services
                 .Include(x => x.User)
                 .Include(x => x.Quiz)
                 .Where(x => x.QuizShortCode == quizShortCode)
-                .Select( ur => new ReportRow
+                .Select(ur => new ReportRow
                 {
                     Email = ur.User.Email,
                     FullName = ur.User.FullName,

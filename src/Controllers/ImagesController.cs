@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
 {
@@ -11,7 +10,8 @@ namespace light_quiz_api.Controllers
         public ImagesController(FileBlobService blobService)
         {
             _blobService = blobService;
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Generates a secure upload URI for image files.
         /// </summary>
         /// <remarks>
@@ -22,7 +22,7 @@ namespace light_quiz_api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost("upload")]
         public IActionResult UploadImage()
-        { 
+        {
             var fileName = Guid.NewGuid().ToString() + ".jpg";
             var uploadUri = _blobService.GeneratePictureUploadSasUri(fileName);
 

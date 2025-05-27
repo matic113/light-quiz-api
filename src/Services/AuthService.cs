@@ -1,12 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using light_quiz_api.Dtos;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using light_quiz_api.Models;
-using light_quiz_api.Helpers;
+using light_quiz_api.Dtos;
+using Microsoft.Extensions.Options;
 
 namespace light_quiz_api.Services;
 

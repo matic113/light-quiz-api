@@ -1,4 +1,5 @@
-﻿global using light_quiz_api.Data;
+﻿global using System.Text;
+global using light_quiz_api.Data;
 global using light_quiz_api.Helpers;
 global using light_quiz_api.Models;
 global using light_quiz_api.Services;
@@ -7,4 +8,3 @@ global using Microsoft.AspNetCore.Identity;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OpenApi.Models;
-global using System.Text;

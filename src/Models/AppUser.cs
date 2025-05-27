@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace light_quiz_api.Models
+﻿namespace light_quiz_api.Models
 {
     public class AppUser : IdentityUser<Guid>
     {

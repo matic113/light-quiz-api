@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace light_quiz_api.Dtos
+﻿namespace light_quiz_api.Dtos
 {
     public class RegisterRequest
     {

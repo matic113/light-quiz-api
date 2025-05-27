@@ -1,7 +1,6 @@
 ﻿
 using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
-using Microsoft.Extensions.Options;
 
 namespace light_quiz_api
 {

@@ -1,8 +1,6 @@
-﻿using light_quiz_api.Services;
-using light_quiz_api.Dtos;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using light_quiz_api.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
 {
@@ -18,7 +16,8 @@ namespace light_quiz_api.Controllers
             _authService = authService;
             _userManager = userManager;
             _userAvatarService = userAvatarService;
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Registers a new user account in the system.
         /// </summary>
         /// <remarks>
@@ -38,7 +37,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(new { token = registerResult.Token, expireOn = registerResult.ExpiresOn });
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Authenticates a user and returns a JWT token.
         /// </summary>
         /// <remarks>
@@ -59,7 +59,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(new { token = loginResult.Token, expireOn = loginResult.ExpiresOn });
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Updates the device token for push notifications.
         /// </summary>
         /// <remarks>
@@ -90,7 +91,8 @@ namespace light_quiz_api.Controllers
             currentUser.DeviceToken = deviceToken;
             await _userManager.UpdateAsync(currentUser);
             return Ok("Device token updated successfully.");
-        }        /// <summary>
+        }       
+        /// <summary>
         /// Validates the current user's authentication status.
         /// </summary>
         /// <remarks>
@@ -125,7 +127,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok("Authenticated");
-        }        /// <summary>
+        }       
+        /// <summary>
         /// Retrieves the current authenticated user's profile information.
         /// </summary>
         /// <remarks>

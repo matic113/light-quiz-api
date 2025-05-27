@@ -1,5 +1,4 @@
 ﻿using Hangfire;
-using light_quiz_api.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
@@ -16,7 +15,8 @@ namespace light_quiz_api.Controllers
             _logger = logger;
         }
 
-        public record PromptRequest(string Prompt);        /// <summary>
+        public record PromptRequest(string Prompt);        
+        /// <summary>
         /// Generates AI content using Google's Gemini API.
         /// </summary>
         /// <remarks>

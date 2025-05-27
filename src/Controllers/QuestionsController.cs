@@ -1,5 +1,4 @@
 ﻿using light_quiz_api.Dtos.Question;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
@@ -13,7 +12,8 @@ namespace light_quiz_api.Controllers
         public QuestionsController(ApplicationDbContext context)
         {
             _context = context;
-        }        /// <summary>
+        }
+        /// <summary>
         /// Retrieves all available question types.
         /// </summary>
         /// <remarks>

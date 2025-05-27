@@ -1,5 +1,4 @@
 ﻿using light_quiz_api.Dtos.Notifications;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
@@ -15,7 +14,8 @@ namespace light_quiz_api.Controllers
         {
             _notificationService = notificationService;
             _context = context;
-        }        /// <summary>
+        }
+        /// <summary>
         /// Sends a notification to all members of a specific group.
         /// </summary>
         /// <remarks>

@@ -150,7 +150,7 @@ namespace light_quiz_api.Services
                 QuizTitle = quiz.Title,
                 QuizShortCode = quiz.ShortCode,
                 UserId = studentId,
-                Grade =totalPoints,
+                Grade = totalPoints,
                 PossiblePoints = possiblePoints,
                 CorrectQuestions = gradingResponse.Results.Count(r => r.Rating > 5),
                 TotalQuestion = quiz.Questions.Count,
@@ -192,5 +192,5 @@ namespace light_quiz_api.Services
             return markdown.Substring(startIndex, endIndex - startIndex).Trim();
         }
 
-    } 
+    }
 }

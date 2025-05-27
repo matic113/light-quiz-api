@@ -1,6 +1,5 @@
 ﻿using light_quiz_api.Dtos.Group;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace light_quiz_api.Controllers
@@ -19,7 +18,8 @@ namespace light_quiz_api.Controllers
             _context = context;
             _codeGenerator = codeGenerator;
             _userManager = userManager;
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Creates a new group with specified members.
         /// </summary>
         /// <remarks>
@@ -77,7 +77,8 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetGroup), new { shortCode }, null);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Adds new members to an existing group.
         /// </summary>
         /// <remarks>
@@ -140,7 +141,8 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }        /// <summary>
+        }       
+        /// <summary>
         /// Removes specified members from a group.
         /// </summary>
         /// <remarks>
@@ -178,7 +180,7 @@ namespace light_quiz_api.Controllers
             {
                 var isAlreadyMember = group.GroupMembers.Any(gm => gm.MemberId == memberId);
 
-                if (!isAlreadyMember) 
+                if (!isAlreadyMember)
                 {
                     continue; // Skip adding if already not a member
                 }
@@ -192,7 +194,8 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }        /// <summary>
+        }       
+        /// <summary>
         /// Allows a user to join a group using its short code.
         /// </summary>
         /// <remarks>
@@ -234,7 +237,8 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Allows a user to leave a group.
         /// </summary>
         /// <remarks>
@@ -273,7 +277,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok();
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves all groups created by the authenticated user.
         /// </summary>
         /// <remarks>
@@ -327,7 +332,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves all groups where the authenticated user is a member.
         /// </summary>
         /// <remarks>
@@ -349,7 +355,8 @@ namespace light_quiz_api.Controllers
 
             var response = new List<GetGroupResponse>();
 
-            foreach (var group in groups) {
+            foreach (var group in groups)
+            {
 
                 var teacher = group.GroupMembers
                     .FirstOrDefault(gm => gm.MemberId == group.CreatedBy);
@@ -381,7 +388,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves detailed information about a specific group by its short code.
         /// </summary>
         /// <remarks>
@@ -432,7 +440,8 @@ namespace light_quiz_api.Controllers
                     }).ToList()
             };
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Deletes a group by its unique identifier.
         /// </summary>
         /// <remarks>
@@ -453,7 +462,8 @@ namespace light_quiz_api.Controllers
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
             return Ok();
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Deletes a group by its short code.
         /// </summary>
         /// <remarks>
@@ -483,7 +493,7 @@ namespace light_quiz_api.Controllers
             {
                 return Guid.Parse(userIdClaim.Value);
             }
-            
+
             return Guid.Empty;
         }
     }

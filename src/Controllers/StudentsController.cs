@@ -1,13 +1,8 @@
-﻿using System.Text.Json;
-using Hangfire;
-using light_quiz_api.Dtos.Question;
+﻿using Hangfire;
 using light_quiz_api.Dtos.Quiz;
 using light_quiz_api.Dtos.QuizProgress;
 using light_quiz_api.Dtos.Student;
-using light_quiz_api.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace light_quiz_api.Controllers
 {
@@ -24,7 +19,8 @@ namespace light_quiz_api.Controllers
             _context = context;
             _backgroundJobClient = backgroundJobClient;
             _gradingService = gradingService;
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Saves student progress for a quiz attempt.
         /// </summary>
         /// <remarks>
@@ -85,7 +81,8 @@ namespace light_quiz_api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }        /// <summary>
+        }
+        /// <summary>
         /// Retrieves the current progress of a student's quiz attempt.
         /// </summary>
         /// <remarks>
@@ -132,7 +129,8 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Submits a completed quiz for grading.
         /// </summary>
         /// <remarks>
@@ -227,7 +225,8 @@ namespace light_quiz_api.Controllers
             _backgroundJobClient.Enqueue(() => _gradingService.GradeQuizAsync(studentId, quizId));
 
             return Ok();
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves the result of a student's quiz attempt by quiz ID.
         /// </summary>
         /// <remarks>
@@ -247,7 +246,7 @@ namespace light_quiz_api.Controllers
             }
 
             var studentId = GetCurrentUserId();
-            
+
             var result = await _context.UserResults
                                 .Where(ur => ur.UserId == studentId && ur.QuizId == quizId)
                                 .Select(ur => new GetStudentResultResponse
@@ -269,7 +268,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(result);
-        }        /// <summary>
+        }
+        /// <summary>
         /// Retrieves the result of a student's quiz attempt by quiz short code.
         /// </summary>
         /// <remarks>
@@ -311,7 +311,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(result);
-        }        /// <summary>
+        }       
+        /// <summary>
         /// Retrieves all quiz results for the authenticated student.
         /// </summary>
         /// <remarks>

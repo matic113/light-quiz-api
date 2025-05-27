@@ -3,13 +3,8 @@ using light_quiz_api.Dtos.Question;
 using light_quiz_api.Dtos.Quiz;
 using light_quiz_api.Dtos.QuizProgress;
 using light_quiz_api.Dtos.Student;
-using light_quiz_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text.RegularExpressions;
 
 namespace light_quiz_api.Controllers
 {
@@ -30,7 +25,8 @@ namespace light_quiz_api.Controllers
             _backgroundJobClient = backgroundJobClient;
             _shortCodeGenerator = shortCodeGenerator;
             _reportService = reportService;
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves quiz metadata by quiz ID.
         /// </summary>
         /// <remarks>
@@ -105,7 +101,8 @@ namespace light_quiz_api.Controllers
 
 
             return Ok(response);
-        }        /// <summary>
+        }       
+        /// <summary>
         /// Retrieves quiz metadata by quiz short code.
         /// </summary>
         /// <remarks>
@@ -167,7 +164,7 @@ namespace light_quiz_api.Controllers
                 }
             }
 
-            var pastAttempt= await _context.QuizAttempts
+            var pastAttempt = await _context.QuizAttempts
                 .FirstOrDefaultAsync(x => x.QuizId == response.QuizId && x.StudentId == studentId);
 
             if (pastAttempt?.State == AttemptState.Submitted ||
@@ -179,7 +176,8 @@ namespace light_quiz_api.Controllers
             response.DidStartQuiz = pastAttempt?.State == AttemptState.InProgress;
 
             return Ok(response);
-        }        /// <summary>
+        }
+        /// <summary>
         /// Retrieves quiz metadata for quizzes within a specific group.
         /// </summary>
         /// <remarks>
@@ -196,7 +194,7 @@ namespace light_quiz_api.Controllers
                 .Include(g => g.GroupMembers)
                 .FirstOrDefaultAsync(g => g.ShortCode == shortCode);
 
-            if(group is null)
+            if (group is null)
             {
                 return NotFound($"group with shortCode: {shortCode} doesn't exist");
             }
@@ -242,7 +240,8 @@ namespace light_quiz_api.Controllers
                 return NotFound($"No quizzes found for group with shortcode: {shortCode}");
             }
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves all quizzes created by the authenticated user.
         /// </summary>
         /// <remarks>
@@ -280,7 +279,8 @@ namespace light_quiz_api.Controllers
                 return NotFound($"No quizzes found for user with Id: {userId}");
             }
             return Ok(response);
-        }        /// <summary>
+        }
+        /// <summary>
         /// Starts a new quiz attempt and retrieves quiz questions.
         /// </summary>
         /// <remarks>
@@ -313,7 +313,7 @@ namespace light_quiz_api.Controllers
             {
                 return NotFound();
             }
-           
+
             var allowedMinutesDifference = 1;
 
             var studentStartTime = DateTime.UtcNow;
@@ -407,7 +407,8 @@ namespace light_quiz_api.Controllers
         /// </remarks>
         [ProducesResponseType(typeof(GetQuizResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost("resume/{quizId:guid}")]
         public async Task<ActionResult<Quiz>> ResumeQuiz(Guid quizId)
         {
@@ -422,7 +423,7 @@ namespace light_quiz_api.Controllers
                 return BadRequest($"student with Id: {studentId} hasn't started this quiz yet.");
             }
 
-            if( pastAttempt?.State == AttemptState.Submitted ||
+            if (pastAttempt?.State == AttemptState.Submitted ||
                 pastAttempt?.State == AttemptState.AutomaticallySubmitted)
             {
                 return BadRequest($"student with Id: {studentId} has taken this quiz before.");
@@ -504,7 +505,8 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves a student's quiz review by quiz short code.
         /// </summary>
         /// <remarks>
@@ -532,7 +534,7 @@ namespace light_quiz_api.Controllers
             {
                 return BadRequest($"Student with Id: {studentId} is still taking this quiz.");
             }
-            
+
             var answers = await _context.StudentAnswers
                 .Where(x => x.QuizId == quizAttempt.QuizId && x.UserId == studentId)
                 .Include(x => x.Question)
@@ -541,7 +543,7 @@ namespace light_quiz_api.Controllers
 
             var reviewQuestions = new List<GetQuestionReviewResponse>();
 
-            foreach(var answer in answers)
+            foreach (var answer in answers)
             {
                 var question = answer.Question;
                 var questionOptions = question.QuestionOptions.Select(x => new GetQuestionOptionsResponse
@@ -573,7 +575,8 @@ namespace light_quiz_api.Controllers
                             .Where(x => x.UserId == studentId && x.QuizShortCode == shortCode)
                             .FirstOrDefaultAsync();
 
-            var response = new GetQuizReviewResponse{
+            var response = new GetQuizReviewResponse
+            {
                 QuizId = quizAttempt.QuizId,
                 ShortCode = shortCode,
                 Title = quizAttempt.Quiz.Title,
@@ -588,7 +591,8 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }        /// <summary>
+        }       
+        /// <summary>
         /// Retrieves all student responses for a specific quiz by short code.
         /// </summary>
         /// <remarks>
@@ -626,7 +630,8 @@ namespace light_quiz_api.Controllers
             }
 
             return Ok(results);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Retrieves quiz data for manual grading of a student's submission.
         /// </summary>
         /// <remarks>
@@ -719,7 +724,8 @@ namespace light_quiz_api.Controllers
             };
 
             return Ok(response);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Updates student grades after manual grading.
         /// </summary>
         /// <remarks>
@@ -775,7 +781,8 @@ namespace light_quiz_api.Controllers
 
             await _context.SaveChangesAsync();
             return Ok();
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Creates a new quiz with questions and options.
         /// </summary>
         /// <remarks>
@@ -798,7 +805,8 @@ namespace light_quiz_api.Controllers
                 return BadRequest("Quiz must have at least one question.");
             }
 
-            var newQuiz = new Quiz{
+            var newQuiz = new Quiz
+            {
                 Id = Guid.NewGuid(),
                 Title = request.Title,
                 Description = request.Description,
@@ -855,7 +863,8 @@ namespace light_quiz_api.Controllers
 
             var isValidGroupId = request.GroupId is not null || request.GroupId != Guid.Empty;
 
-            if (isValidGroupId && request.Anonymous == false) {
+            if (isValidGroupId && request.Anonymous == false)
+            {
                 // add the group to quiz
                 var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == request.GroupId);
 
@@ -881,11 +890,12 @@ namespace light_quiz_api.Controllers
                 _backgroundJobClient.Schedule<NotificationService>(
                     service => service.NotifyGroupForQuizAsync((Guid)newQuiz.GroupId, newQuiz.Id),
                     notificationTime
-                    ); 
+                    );
             }
 
             return CreatedAtAction(nameof(GetQuizMetadataByShortCode), new { shortCode }, null);
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Deletes a quiz by its unique identifier.
         /// </summary>
         /// <remarks>
@@ -906,7 +916,8 @@ namespace light_quiz_api.Controllers
             _context.Quizzes.Remove(quiz);
             await _context.SaveChangesAsync();
             return Ok();
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Deletes a quiz by its short code.
         /// </summary>
         /// <remarks>
@@ -927,7 +938,8 @@ namespace light_quiz_api.Controllers
             _context.Quizzes.Remove(quiz);
             await _context.SaveChangesAsync();
             return Ok();
-        }        /// <summary>
+        }        
+        /// <summary>
         /// Generates a comprehensive report for a quiz.
         /// </summary>
         /// <remarks>
